@@ -42,7 +42,7 @@ override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
 
 ##########################################################
 PROG = TEST
-default: ${PROG}
+default: MK_OBJDIR ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90
 	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
@@ -54,6 +54,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	  $(MPICC) -c -o $@ $< 
 
 #include shared/Makefile FLEXWIN/Makefile measure_adj/Makefile
+
+MK_OBJDIR:
+	mkdir -p $(OBJDIR)
 
 make_asdf:
 	cd src/asdf_util; make
