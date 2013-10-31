@@ -1,0 +1,25 @@
+#=================================================================
+#if RUN_FLEXWIN, calculate the flexwin; 
+#if not, windows are already been generated. Read from window file
+#
+#
+#
+#=================================================================
+
+RUN_FLEXWIN                 = .TRUE.
+RUN_MEASURE_ADJ             = .TRUE.
+WRITE_ADJ_ASDF              = .TRUE.
+ROTATE_COMP                 = .TRUE.
+WRITE_NORMAL_OUTPUT         = .false.
+
+#location info
+OBSD_FILE                   = /tigress/lei/ASDF/ASDF_CONVERTER/200801151752A_27_60_obsd.bp 
+SYNT_FILE                   = /tigress/lei/ASDF/ASDF_CONVERTER/200801151752A_27_60_synt.bp 
+ADJ_FILE                    = ./OUTPUT/200801151752A_27_60_adj.bp
+WIN_FILE                    = ./200801151752A_27_60.win.mat
+FLEXWIN_OUTDIR              = ./FLEXWIN/OUTPUT
+MEASURE_ADJ_OUTDIR          = ./measure_adj/OUTPUT
+
+#some other options
+WEIGHTING_OPTION            = 1
+

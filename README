@@ -1,0 +1,21 @@
+#This program is used to select window(FLEXWIN), make measurements and calculate adjoint source. There are so many people who contributed to FLEXWIN and Measure_adj. I will add credit soon...
+
+#PARALLEL DEVELOPER: Wenjie Leio
+#ORIGINAL DEVELOPER: add soon...
+
+How to run:
+1 There are at least several Par_file you might be intrested in:
+  a) PAR_FILE_MAIN: flags and file info
+  b) FLEXWIN/PAR_FILES: Parameter files for flexwin, differetiated by component and period band.
+  c) FLEXWIN/src/user_functions.f90: user_functions settings inside. Modify it a little. However, if you look into it, it's very simple. Have to make this modification because we are now working in a different way.
+  d) measure_adj/PAR_FILES: includes the previous MEASUREMENT.PAR file(also differentiated by component and period band). You don't need the MEASUREMENT.WINDOWS file now since this kind of information is in the memory now.
+
+2. make clean --> make
+
+3. ./TEST(you can also submit the job the cluster and run it in parallel, which is the ultimate point of this program. But even you run on 1 processor, you can still get hugh speed up!)
+
+
+TODO:
+1) Give options to weighting.
+2) The code works but far from perfect. Still need time the check carefully.
+3) still a lot improvements. The 1st released version is simplied whatever.
