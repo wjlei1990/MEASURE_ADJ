@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/cig/!svn/ver/21081/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS
+END
+9818433_T006_T030_MPM_CI_m16_iker07_win_adj_DEFAULT.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/cig/!svn/ver/18821/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/9818433_T006_T030_MPM_CI_m16_iker07_win_adj_DEFAULT.pdf
+END
+STATIONS_TOMO
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/cig/!svn/ver/12122/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/STATIONS_TOMO
+END
+plot_win_stats.pl
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/cig/!svn/ver/18827/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/plot_win_stats.pl
+END
+plot_win_adj.pl
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/cig/!svn/ver/21081/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/plot_win_adj.pl
+END
+plot_win_stats_all.pl
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/cig/!svn/ver/18827/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/plot_win_stats_all.pl
+END
+make_pdf_by_event.pl
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/cig/!svn/ver/18111/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/make_pdf_by_event.pl
+END
+make_pdf_by_station.pl
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/cig/!svn/ver/18111/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/make_pdf_by_station.pl
+END
+plot_win_adj_all.pl
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/cig/!svn/ver/21075/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/plot_win_adj_all.pl
+END
+pssac2
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/19237/seismo/3D/ADJOINT_TOMO/measure_adj/PLOTS/pssac2
+END

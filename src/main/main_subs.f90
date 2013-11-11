@@ -326,15 +326,24 @@ subroutine copy_general_info_to_adj(obsd, adj)
   adj%min_period=obsd%min_period
   adj%max_period=obsd%max_period
 
+  adj%receiver_name=""
+  adj%network=""
+  adj%component=""
+  adj%receiver_id=""
+
   adj%receiver_name=obsd%receiver_name
   adj%network=obsd%network
   adj%component=obsd%component
   adj%receiver_id=obsd%receiver_id
 
+  print *, trim(obsd%receiver_id)
+  print *, trim(adj%receiver_id)
+
   do i=1,obsd%nrecords
     adj%receiver_lat(:)=obsd%receiver_lat(:)
     adj%receiver_lo(:)=obsd%receiver_lo(:)
     adj%scale_factor(:)=obsd%scale_factor(:)
+
     adj%receiver_name_array(:)=obsd%receiver_name_array(:)
     adj%network_array(:)=obsd%network_array(:)
     adj%component_array(:)=obsd%component_array(:)

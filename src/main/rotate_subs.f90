@@ -26,6 +26,11 @@ contains
 
     total_num_z=0
 
+    !adj_all_rotate%receiver_name = ""
+    !adj_all_rotate%network = ""
+    !adj_all_rotate%component = ""
+    !adj_all_rotate%receiver_id = ""
+
 		temp_len=maxval(adj_all%npoints(1:(adj_all%nrecords)))
     allocate(zdata(temp_len))
     allocate(rdata(temp_len))
@@ -142,6 +147,15 @@ contains
             adj_all%network_array(i)
         adj_all_rotate%network_array(3*order_z) = &
             adj_all%network_array(i)
+
+        adj_all_rotate%receiver_id_array(3*order_z-2) = &
+            adj_all%receiver_id_array(i)
+        adj_all_rotate%receiver_id_array(3*order_z-1) = &
+            adj_all%receiver_id_array(i)
+        adj_all_rotate%receiver_id_array(3*order_z) = &
+            adj_all%receiver_id_array(i)
+
+        
 
         !adj_all_rotate%(3*order_z-2) = 
         !adj_all_rotate%(3*order_z-1) = 

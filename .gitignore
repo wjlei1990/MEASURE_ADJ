@@ -1,7 +1,9 @@
-TEST
+Measure_adj
 *.swl
 *.bp
 *.o
 *.mod
 *.swo
 *.swp
+*.winchi
+*.win.dat

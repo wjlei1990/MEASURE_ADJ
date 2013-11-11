@@ -41,7 +41,7 @@ override ADIOS_INC:=` ${ADIOS_DIR}/bin/adios_config -c -f`
 override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
 
 ##########################################################
-PROG = TEST
+PROG = Measure_adj 
 default: MK_OBJDIR ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90

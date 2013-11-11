@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/18830/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo
+END
+run_mt_cc_plot.pl
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/cig/!svn/ver/18827/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/run_mt_cc_plot.pl
+END
+combine_2_adj_src_all.pl
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/cig/!svn/ver/13309/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/combine_2_adj_src_all.pl
+END
+combine_3_adj_src_all.pl
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/cig/!svn/ver/14491/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/combine_3_adj_src_all.pl
+END
+prepare_measure_adj.pl
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/cig/!svn/ver/18827/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/prepare_measure_adj.pl
+END
+combine_2_adj_src.pl
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/cig/!svn/ver/13106/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/combine_2_adj_src.pl
+END
+run_tomo.pl
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/cig/!svn/ver/18827/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/run_tomo.pl
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/cig/!svn/ver/13106/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/README
+END
+combine_3_adj_src.pl
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/cig/!svn/ver/13106/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/combine_3_adj_src.pl
+END
+run_measure_adj.pl
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/cig/!svn/ver/18830/seismo/3D/ADJOINT_TOMO/measure_adj/scripts_tomo/run_measure_adj.pl
+END

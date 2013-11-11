@@ -18,7 +18,9 @@ contains
     double precision :: data_double(npt)
     double precision :: b_double, dt_double
 
-    call(fname,data_double, npt, b_double, dt_double)
+    data_double(1:npt)=dble(data(1:npt))
+
+    call dwascii(fname,data_double, npt, b_double, dt_double)
 
   end subroutine rwascii
 
