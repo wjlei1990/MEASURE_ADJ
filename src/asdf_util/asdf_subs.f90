@@ -83,12 +83,12 @@ subroutine define_asdf_data (adios_group, my_group_size, my_asdf, &
   !call define_adios_scalar (adios_group, my_group_size, "", "gmt_msec", &
   !                      dum_int)
   !location info
-  call define_adios_scalar (adios_group, my_group_size, "", "event_lat", &
-                        dum_real)
-  call define_adios_scalar (adios_group, my_group_size, "", "event_lo", &
-                        dum_real)
-  call define_adios_scalar (adios_group, my_group_size, "", "event_dpt", &
-                        dum_real)
+  !call define_adios_scalar (adios_group, my_group_size, "", "event_lat", &
+  !                      dum_real)
+  !call define_adios_scalar (adios_group, my_group_size, "", "event_lo", &
+  !                      dum_real)
+  !call define_adios_scalar (adios_group, my_group_size, "", "event_dpt", &
+  !                      dum_real)
 
   !string info
   call define_adios_scalar (adios_group, my_group_size, "", "receiver_name_len", &
@@ -102,7 +102,14 @@ subroutine define_asdf_data (adios_group, my_group_size, my_asdf, &
 
   !print *, "TAG"
   !HEADER info
-  open(5, file="./ASDF_HEADERS", status='old')
+  open(5, file="./src/asdf_util/ASDF_HEADERS", iostat=stat, status='old')
+  if(stat.ne.0)then
+    print *,"Can not find ASDF_HEADERS"
+    print *,"The default path: ./src/asdf_util/ASDF_HEADERS"
+    print *,"Quit!"
+    stop
+  endif
+
   do
     read (5, *, iostat=stat) data_type, header
     if (stat /= 0) exit
@@ -133,7 +140,8 @@ subroutine define_asdf_data (adios_group, my_group_size, my_asdf, &
     write (i_string, '(I10)' ) i+offset
 		record=trim(my_asdf%receiver_name_array(i))//"."//&
 						trim(my_asdf%network_array(i))//"."//&
-						trim(my_asdf%component_array(i))
+						trim(my_asdf%component_array(i))//"."//&
+						trim(my_asdf%receiver_id_array(i))
 		!print *, trim(record)
     !write( npts_string, '(I6)' ) npts(i)
     !call define_adios_global_real_1d_array (adios_group, my_group_size,&
@@ -217,7 +225,51 @@ end subroutine define_asdf_data
 !! \param file_name The file will be saved as file_name.
 !! \param comm Size of the group associated with the MPI communicator
 
-subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, adios_groupsize, rank, nproc, comm, ierr)
+subroutine write_asdf_file(asdf_fn, my_asdf, rank, nproc, comm, ierr)
+
+  use asdf_data
+  use adios_write_mod
+
+  character(len=*) :: asdf_fn 
+  type(asdf_event) :: my_asdf
+  integer :: rank, nproc, comm, ierr
+
+  integer        :: adios_err
+  integer(kind=8)         :: adios_groupsize, adios_totalsize, varid
+  integer(kind=8)         :: adios_handle, adios_group
+
+	!print *,"Write out file: ", trim(asdf_fn)
+  !print *,"comm:", comm
+  !adios write init
+  call adios_init_noxml (comm, adios_err)
+	!print *,"Write out file: ", trim(asdf_fn)
+  call adios_allocate_buffer (200, adios_err)
+	!print *,"Write out file: ", trim(asdf_fn)
+  call adios_declare_group (adios_group, "EVENTS", "iter", 1, adios_err)
+	!print *,"Write out file: ", trim(asdf_fn)
+  call adios_select_method (adios_group, "MPI", "", "", adios_err)
+
+  !calculate size
+  adios_groupsize = 0
+	print *,"Write out file: ", trim(asdf_fn)
+  call define_asdf_data (adios_group, adios_groupsize, my_asdf,&
+						rank, nproc, comm, ierr)
+  print *, "define finished!"
+  call adios_open (adios_handle, "EVENTS", asdf_fn, "w", comm, adios_err)
+  call adios_group_size (adios_handle, adios_groupsize, adios_totalsize, adios_err)
+
+  !call the write sub
+  call write_asdf_file_sub (my_asdf, adios_handle, adios_group,&
+						adios_groupsize, rank, nproc, comm, ierr)
+
+  !adios close
+  call adios_close(adios_handle, adios_err)
+  call adios_finalize (rank, adios_err)
+
+end subroutine write_asdf_file
+
+
+subroutine write_asdf_file_sub (my_asdf, adios_handle, my_adios_group, adios_groupsize, rank, nproc, comm, ierr)
 
   use adios_write_mod
   use asdf_data
@@ -233,7 +285,6 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
 	integer :: rn_len_total, nw_len_total, rid_len_total, comp_len_total
 	integer :: rn_offset, nw_offset, rid_offset, comp_offset
   character(len=32)              :: loc_string
-  character(len=100),intent(in) :: file_name
 
 	character(len=:), allocatable :: receiver_name, network, component, receiver_id
 
@@ -256,24 +307,26 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
 					rank, nproc, comm, ierr)
 
   !string
+  print *,"write string"
 	if(rank.eq.0)then
-		print *,"string_gathered:", trim(receiver_name)
+		!print *,"string_gathered:", trim(receiver_name)
   	call adios_write(adios_handle, "receiver_name", trim(receiver_name), adios_err)
   	call adios_write(adios_handle, "network", trim(network), adios_err)
   	call adios_write(adios_handle, "component", trim(component), adios_err)
   	call adios_write(adios_handle, "receiver_id", trim(receiver_id), adios_err) 
 	endif
 
-
+  print *,"Write seismic record"
   !call adios_write(adios_handle, "event", my_asdf%event, adios_err)
   do i = 1, my_asdf%nrecords
   	write( loc_string, '(I10)' ) i+offset
 	 	!loc_string=trim("DISPLACEMENT#")//trim(adjustl(loc_string))
 		loc_string=trim(my_asdf%receiver_name_array(i))//"."//&
 						trim(my_asdf%network_array(i))//"."//&
-						trim(my_asdf%component_array(i))
-	 !print *, trim(loc_string)
-   call write_adios_global_real_1d_array(adios_handle, rank, nproc, &
+						trim(my_asdf%component_array(i))//"."//&
+						trim(my_asdf%receiver_id_array(i))
+	  !print *, trim(loc_string)
+    call write_adios_global_real_1d_array(adios_handle, rank, nproc, &
 	 				my_asdf%npoints(i), my_asdf%npoints(i), 0, &
 					loc_string, my_asdf%records(i)%record)
   enddo
@@ -297,9 +350,9 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
   	!call adios_write(adios_handle, "gmt_sec", my_asdf%gmt_sec, adios_err)
   	!call adios_write(adios_handle, "gmt_msec", my_asdf%gmt_msec, adios_err) 
 
-  	call adios_write(adios_handle, "event_lat", my_asdf%event_lat, adios_err) 
-  	call adios_write(adios_handle, "event_lo", my_asdf%event_lo, adios_err) 
-  	call adios_write(adios_handle, "event_dpt", my_asdf%event_dpt, adios_err) 
+  	!call adios_write(adios_handle, "event_lat", my_asdf%event_lat, adios_err) 
+  	!call adios_write(adios_handle, "event_lo", my_asdf%event_lo, adios_err) 
+  	!call adios_write(adios_handle, "event_dpt", my_asdf%event_dpt, adios_err) 
 		!string needs special attention in adios: event
 
   	call adios_write(adios_handle, "min_period", my_asdf%min_period, adios_err) 
@@ -313,7 +366,6 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
 
 
   !array
-  print *,"write string"
 	!call write_adios_global_string_1d_array(adios_handle, rank, nproc,&
 	!			my_asdf%receiver_name_len, rn_len_total, rn_offset,&
 	!			"receiver_name", my_asdf%receiver_name)
@@ -344,12 +396,12 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
   call write_adios_global_integer_1d_array(adios_handle, rank, nproc, my_asdf%nrecords,&
         nrecords_total, offset, "gmt_msec", my_asdf%gmt_msec)
 
-  !call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
-   !     nrecords_total, offset, "event_lat", my_asdf%event_lat)
-  !call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
-  !      nrecords_total, offset, "event_lo", my_asdf%event_lo)
-  !call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
-  !      nrecords_total, offset, "event_dpt", my_asdf%event_dpt)
+  call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
+        nrecords_total, offset, "event_lat", my_asdf%event_lat)
+  call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
+        nrecords_total, offset, "event_lo", my_asdf%event_lo)
+  call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
+        nrecords_total, offset, "event_dpt", my_asdf%event_dpt)
 
   call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords, &
         nrecords_total, offset, "receiver_lat", my_asdf%receiver_lat)
@@ -388,7 +440,7 @@ subroutine write_asdf_file (file_name, my_asdf, adios_handle, my_adios_group, ad
   call write_adios_global_real_1d_array(adios_handle, rank, nproc, my_asdf%nrecords,& 
 				nrecords_total, offset, "S_pick", my_asdf%S_pick)
 
-end subroutine write_asdf_file
+end subroutine write_asdf_file_sub
 
 subroutine gather_offset_info(local_dim, global_dim, offset,&
 						rank, nproc, comm, ierr)
@@ -657,7 +709,8 @@ subroutine read_asdf_file (file_name, my_asdf, rank, nproc, comm, ierr)
     !print *, "loc_string:", trim(loc_string)
 		loc_string=trim(my_asdf%receiver_name_array(local_index))//"."//&
 						trim(my_asdf%network_array(local_index))//"."//&
-						trim(my_asdf%component_array(local_index))
+						trim(my_asdf%component_array(local_index))//"."//&
+						trim(my_asdf%receiver_id_array(local_index))
     !call adios_inq_var(fh,loc_string,vtype,vsteps,vrank,dims,ierr)
 		call adios_get_scalar(fh, trim(loc_string)//"/global_dim",dims(1), ierr)
 		!print *, trim(loc_string), dims(1)
@@ -743,11 +796,11 @@ subroutine read_asdf_file (file_name, my_asdf, rank, nproc, comm, ierr)
   !call adios_get_scalar (fh, "/gmt_sec", my_asdf%gmt_sec, ierr)
   !call adios_get_scalar (fh, "/gmt_msec", my_asdf%gmt_msec, ierr)
   !print *, "my_asdf%event:",my_asdf%event
-  call adios_get_scalar (fh, "/event_lat", my_asdf%event_lat, ierr)
+  !call adios_get_scalar (fh, "/event_lat", my_asdf%event_lat, ierr)
   !print *, "my_asdf%event:",my_asdf%event
-  call adios_get_scalar (fh, "/event_lo", my_asdf%event_lo, ierr)
+  !call adios_get_scalar (fh, "/event_lo", my_asdf%event_lo, ierr)
   !print *, "my_asdf%event:",my_asdf%event
-  call adios_get_scalar (fh, "/event_dpt", my_asdf%event_dpt, ierr)
+  !call adios_get_scalar (fh, "/event_dpt", my_asdf%event_dpt, ierr)
 
 	call adios_get_scalar (fh, "/max_period", my_asdf%max_period, ierr)
 	call adios_get_scalar (fh, "/min_period", my_asdf%min_period, ierr)
@@ -768,9 +821,9 @@ subroutine read_asdf_file (file_name, my_asdf, rank, nproc, comm, ierr)
   call adios_schedule_read (fh, sel, "gmt_sec/array", 0, 1, my_asdf%gmt_sec, ierr)
   call adios_schedule_read (fh, sel, "gmt_msec/array", 0, 1, my_asdf%gmt_msec, ierr)
 
-  !call adios_schedule_read (fh, sel, "event_lat/array", 0, 1, my_asdf%event_lat, ierr)
-  !call adios_schedule_read (fh, sel, "event_lo/array", 0, 1, my_asdf%event_lo, ierr)
-  !call adios_schedule_read (fh, sel, "event_dpt/array", 0, 1, my_asdf%event_dpt, ierr)
+  call adios_schedule_read (fh, sel, "event_lat/array", 0, 1, my_asdf%event_lat, ierr)
+  call adios_schedule_read (fh, sel, "event_lo/array", 0, 1, my_asdf%event_lo, ierr)
+  call adios_schedule_read (fh, sel, "event_dpt/array", 0, 1, my_asdf%event_dpt, ierr)
 
   call adios_schedule_read (fh, sel, "receiver_lat/array", 0, 1, my_asdf%receiver_lat, ierr)
   call adios_schedule_read (fh, sel, "receiver_lo/array", 0, 1, my_asdf%receiver_lo, ierr)
@@ -934,9 +987,9 @@ subroutine init_asdf_data(my_asdf,nrecords)
   allocate (my_asdf%gmt_sec(my_asdf%nrecords))
   allocate (my_asdf%gmt_msec(my_asdf%nrecords))
 
-  !allocate (my_asdf%event_lat(my_asdf%nrecords))
-  !allocate (my_asdf%event_lo(my_asdf%nrecords))
-  !allocate (my_asdf%event_dpt(my_asdf%nrecords))
+  allocate (my_asdf%event_lat(my_asdf%nrecords))
+  allocate (my_asdf%event_lo(my_asdf%nrecords))
+  allocate (my_asdf%event_dpt(my_asdf%nrecords))
 
   allocate (my_asdf%receiver_lat(my_asdf%nrecords))
   allocate (my_asdf%receiver_lo(my_asdf%nrecords))

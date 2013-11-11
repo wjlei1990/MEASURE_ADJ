@@ -7,13 +7,15 @@
 #=================================================================
 
 WRITE_ADJ_ASDF              = .TRUE.
-ROTATE_COMP                 = .TRUE.
 WRITE_NORMAL_OUTPUT         = .false.
+ROTATE_COMP                 = .TRUE.
 
-#location info
-OBSD_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_27_60_obsd.bp 
-SYNT_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_27_60_synt.bp 
-FLEXWIN_OUTDIR              = /tigress/lei/ASDF/FLEXWIN/OUTPUT
+#INPUT info
+OBSD_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_obs.bp 
+SYNT_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_sem.bp 
+WIN_DIR                     = /tigress/lei/ASDF/FLEXWIN/OUTPUT/200801151752A_17_60
+
+#OUTPUT info
 MEASURE_ADJ_OUTDIR          = OUTPUT
 
 #some other options

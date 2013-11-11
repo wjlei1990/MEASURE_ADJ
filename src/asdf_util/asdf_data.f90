@@ -7,7 +7,7 @@ module asdf_data
   type asdf_event
     ! scalars
     character(len=13)     :: event
-    real                  :: event_lat, event_lo, event_dpt
+    real, allocatable     :: event_lat(:), event_lo(:), event_dpt(:)
 
     !size info
     integer           :: nrecords

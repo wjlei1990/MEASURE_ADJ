@@ -27,7 +27,7 @@ FC = ifort
 CC = icc
 MPIFC = mpif90
 MPICC = mpicc
-CFLAGS= -g -O0 -check all
+CFLAGS= -g -check all
 
 _OBJ = adios_helpers_definitions.o adios_helpers_writers.o \
 			 adios_helpers.o asdf_data.o asdf_subs.o \

@@ -66,10 +66,10 @@ contains
   end subroutine win_write
 
 
-  subroutine win_read(FLEXWIN_OUTDIR,event,p1,p2,win_all,&
+  subroutine win_read(WIN_DIR,event,p1,p2,win_all,&
                         nrecords,rank,ierr)
 
-    character(len=*) :: FLEXWIN_OUTDIR
+    character(len=*) :: WIN_DIR
     real :: p1, p2
     character(len=*) :: event
     type(win_info), allocatable :: win_all(:)
@@ -89,9 +89,11 @@ contains
     p1_string=adjustl(p1_string)
     p2_string=adjustl(p2_string)
 
-    WIN_FILE=trim(FLEXWIN_OUTDIR)//'/'//trim(event)//'_'//&
-              trim(p1_string)//'_'//trim(p2_string)
-    WIN_FILE=trim(WIN_FILE)//'/'//trim(dummy)//'.win.mat'
+    !WIN_FILE=trim(WIN_DIR)//'/'//trim(event)//'_'//&
+    !          trim(p1_string)//'_'//trim(p2_string)
+    !WIN_FILE=trim(WIN_FILE)//'/'//trim(dummy)//'.win.mat'
+
+    WIN_FILE=trim(WIN_DIR)//'/'//trim(dummy)//'.win.dat'
 
     print *,"WIN_FILE:", trim(WIN_FILE)
 

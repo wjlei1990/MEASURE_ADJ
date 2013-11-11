@@ -28,9 +28,6 @@ program main
   use rotate_subs
   use mpi_weighting_subs
 
-  use adios_write_mod
-  use adios_read_mod
-
   use var_main
 	use main_subs
 
@@ -42,6 +39,8 @@ program main
   type(win_chi_info), allocatable :: win_chi_all(:)
   type(ma_par_struct_all) 				:: measure_adj_par_all
   type(ma_weighting_par_struct) 	:: ma_weighting_par
+
+  character(len=200) :: ADJ_FILE
 
   real, allocatable :: adj_source(:)
   !mpi_var
@@ -72,10 +71,10 @@ program main
 	!----------.
   !init adios!
 	!----------'
-  call adios_init_noxml(comm, adios_err)
-  call adios_allocate_buffer(100, adios_err)
-  call adios_declare_group(adios_group,"EVENTS","iter",1,adios_err)
-  call adios_select_method(adios_group,"MPI","","",adios_err)
+  !call adios_init_noxml(comm, adios_err)
+  !call adios_allocate_buffer(100, adios_err)
+  !call adios_declare_group(adios_group,"EVENTS","iter",1,adios_err)
+  !call adios_select_method(adios_group,"MPI","","",adios_err)
 
   !obsd_all%min_period=17.0
   !obsd_all%max_period=60.0
@@ -85,6 +84,7 @@ program main
   !--------------------------'
   print *,"Read in main Parfile..."
   call read_main_parfile_mpi(rank,comm,ierr)
+  !stop
 
   !--------------------------.
   !read in asdf data         !
@@ -102,13 +102,17 @@ program main
 	endif
   !stop
 
+  !should be removed in the future
+  obsd_all%min_period = 17.0
+  obsd_all%max_period = 60.0
+
   !--------------------------.
   !read parfile              !
   !--------------------------'
   print *,"Read in Measure_Adj Parfile..."
   call read_ma_parfile_mpi(measure_adj_par_all, obsd_all%min_period,&
-                    obsd_all%max_period, obsd_all%event_dpt, &
-                    rank, comm, ierr)
+        obsd_all%max_period, obsd_all%event_dpt, obsd_all%nrecords,&
+        rank, comm, ierr)
 
 	call MPI_Barrier(comm,ierr)
  	print *, "rank, number of records: ", rank, obsd_all%nrecords
@@ -122,12 +126,13 @@ program main
   print *,"----------------------------------"
   print *,"READ WIN FILE                     "
   print *,"----------------------------------"
-  call win_read(FLEXWIN_OUTDIR, obsd_all%event, obsd_all%min_period,&
+  call win_read(WIN_DIR, obsd_all%event, obsd_all%min_period,&
                 obsd_all%max_period, win_all,&
                 obsd_all%nrecords, rank, ierr)
  
 	call MPI_Barrier(comm, ierr)
 
+  !stop
   !--------------------------.
   !measure_adj               !
   !--------------------------'
@@ -139,9 +144,9 @@ program main
 	endif
 
   call setup_measure_adj_weighting_asdf_mpi(win_all,obsd_all%nrecords, &
-           obsd_all%great_circle_arc, obsd_all%component_array, &
-           ma_weighting_par,weighting_option, &
-           rank, comm, ierr)
+         obsd_all%great_circle_arc, obsd_all%component_array, &
+         ma_weighting_par,weighting_option, &
+         rank, comm, ierr)
 
   !print *, "Weighting finished!"
   call init_asdf_data(adj_all, obsd_all%nrecords)
@@ -212,16 +217,11 @@ program main
     
     print *,"ADJ_FILE:",trim(ADJ_FILE)
 
-    call define_asdf_data(adios_group, adios_groupsize, adj_all, &
-            rank, nproc, comm, ierr)
-
-    !write out the adj_all to "****_adj.bp" file
-    call adios_open(adios_handle,"EVENTS",ADJ_FILE,"w",comm,adios_err)
-  
-    call adios_group_size (adios_handle, adios_groupsize, adios_totalsize,adios_err)
-    call write_asdf_file (ADJ_FILE,adj_all,adios_handle,adios_group,&
-                adios_groupsize, rank, nproc, comm, ierr)
-    call adios_close(adios_handle, adios_err)
+    if(ROTATE_COMP) then
+      call write_asdf_file (ADJ_FILE, adj_all_rotate, rank, nproc, comm, ierr)
+    else
+      call write_asdf_file (ADJ_FILE, adj_all, rank, nproc, comm, ierr)
+    endif
   endif
 
   if(WRITE_NORMAL_OUTPUT) then
@@ -234,7 +234,6 @@ program main
   !finalize mpi              !
   !--------------------------'
   call MPI_Barrier(comm,ierr)
-  call adios_finalize(rank,adios_err)
   call mpi_finalize(ierr)
 
 	call CPU_TIME(t2)

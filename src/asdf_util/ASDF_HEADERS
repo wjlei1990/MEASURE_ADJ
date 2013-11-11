@@ -9,6 +9,9 @@ s receiver_name
 s network
 s component
 s receiver_id
+r event_lat
+r event_lo
+r event_dpt
 r receiver_lat
 r receiver_lo
 r receiver_el

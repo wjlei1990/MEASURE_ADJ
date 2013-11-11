@@ -23,7 +23,8 @@ subroutine read_main_parfile_mpi(rank, comm, ierr)
 
   call MPI_Bcast(OBSD_FILE,150,MPI_CHARACTER,0,comm,ierr)
   call MPI_Bcast(SYNT_FILE,150,MPI_CHARACTER,0,comm,ierr)
-  call MPI_Bcast(FLEXWIN_OUTDIR,150,MPI_CHARACTER,0,comm,ierr)
+  call MPI_Bcast(WIN_DIR,150,MPI_CHARACTER,0,comm,ierr)
+
   call MPI_Bcast(MEASURE_ADJ_OUTDIR,150,MPI_CHARACTER,0,comm,ierr)
 
   call MPI_Bcast(WEIGHTING_OPTION,1,MPI_INTEGER,0,comm,ierr)
@@ -70,7 +71,7 @@ subroutine read_main_parfile(ierr)
   read(IIN,3) dummy_string, ROTATE_COMP 
   print *,"ROTATE_COMP: ", ROTATE_COMP
   read(IIN,3) dummy_string, WRITE_NORMAL_OUTPUT 
-  print *,"WRITE_NORMAL_OUTPUT",WRITE_NORMAL_OUTPUT
+  print *,"WRITE_NORMAL_OUTPUT: ",WRITE_NORMAL_OUTPUT
 
 	do i=1,2
 		read(IIN,*)
@@ -80,8 +81,13 @@ subroutine read_main_parfile(ierr)
 	print *, "OBSD_FILE: ", trim(OBSD_FILE)
 	read(IIN,2) dummy_string, SYNT_FILE
 	print *, "SYNT_FILE: ", trim(SYNT_FILE)
-	read(IIN,2) dummy_string, FLEXWIN_OUTDIR
-	print *, "FLEXWIN_OUTDIR: ", trim(FLEXWIN_OUTDIR)
+	read(IIN,2) dummy_string, WIN_DIR 
+	print *, "WIN_DIR: ", trim(WIN_DIR)
+
+  do i=1,2
+    read(IIN,*)
+  enddo
+
 	read(IIN,2) dummy_string, MEASURE_ADJ_OUTDIR
 	print *, "MEASURE_ADJ_OUTDIR: ", trim(MEASURE_ADJ_OUTDIR)
 
@@ -101,8 +107,9 @@ subroutine read_main_parfile(ierr)
 
 end subroutine read_main_parfile
 
-subroutine read_ma_parfile_mpi(ma_par_all,min_period,&
-              max_period,event_dpt, rank, comm, ierr)
+subroutine read_ma_parfile_mpi(ma_par_all, min_period, &
+             max_period, event_dpt, nrecords, &
+             rank, comm, ierr)
 
 	use ma_struct
   use measure_adj_subs
@@ -110,8 +117,11 @@ subroutine read_ma_parfile_mpi(ma_par_all,min_period,&
   include 'mpif.h'
 
 	type(ma_par_struct_all) :: ma_par_all
-	real :: min_period, max_period, event_dpt
+	real :: min_period, max_period, event_dpt(:)
 	integer :: rank, comm, ierr
+  integer :: nrecords
+  
+  real :: aver_event_dpt
 
   integer, parameter :: NDIM_PAR=3
   integer, parameter :: BLOCK_PER_DIM=4
@@ -161,9 +171,14 @@ subroutine read_ma_parfile_mpi(ma_par_all,min_period,&
 	call MPI_TYPE_STRUCT(BLOCK_PER_DIM, blockcount, offset, oldtype, newtype, ierr)
 	call MPI_TYPE_COMMIT(newtype, ierr)
 
+  aver_event_dpt=sum(event_dpt(1:nrecords))/nrecords
+  if(abs(aver_event_dpt-event_dpt(1)).gt.5.0)then
+    print *,"check the data(event_dpt). May not in from one event!"
+    stop
+  endif
 	print *, "SET UP finished!"
 	if(rank.eq.0) then
-		call read_ma_parfile(ma_par_all,min_period,max_period,event_dpt)
+		call read_ma_parfile(ma_par_all,min_period,max_period,aver_event_dpt)
     ma_par_temp(1)=ma_par_all%R
     ma_par_temp(2)=ma_par_all%T
     ma_par_temp(3)=ma_par_all%Z
@@ -304,10 +319,17 @@ subroutine copy_general_info_to_adj(obsd, adj)
   type(asdf_event) :: obsd, adj
   integer :: i
 
-  adj%event_lat=obsd%event_lat
-  adj%event_lo=obsd%event_lo
-  adj%event_dpt=obsd%event_dpt
+  adj%event_lat(:)=obsd%event_lat(:)
+  adj%event_lo(:)=obsd%event_lo(:)
+  adj%event_dpt(:)=obsd%event_dpt(:)
   adj%event=obsd%event
+  adj%min_period=obsd%min_period
+  adj%max_period=obsd%max_period
+
+  adj%receiver_name=obsd%receiver_name
+  adj%network=obsd%network
+  adj%component=obsd%component
+  adj%receiver_id=obsd%receiver_id
 
   do i=1,obsd%nrecords
     adj%receiver_lat(:)=obsd%receiver_lat(:)
@@ -316,6 +338,7 @@ subroutine copy_general_info_to_adj(obsd, adj)
     adj%receiver_name_array(:)=obsd%receiver_name_array(:)
     adj%network_array(:)=obsd%network_array(:)
     adj%component_array(:)=obsd%component_array(:)
+    adj%receiver_id_array(:)=obsd%receiver_id_array
     !adj%=obsd%
     !adj%=obsd%
     !adj%=obsd%
