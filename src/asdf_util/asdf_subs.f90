@@ -243,7 +243,7 @@ subroutine write_asdf_file(asdf_fn, my_asdf, rank, nproc, comm, ierr)
   !adios write init
   call adios_init_noxml (comm, adios_err)
 	!print *,"Write out file: ", trim(asdf_fn)
-  call adios_allocate_buffer (200, adios_err)
+  call adios_allocate_buffer (600, adios_err)
 	!print *,"Write out file: ", trim(asdf_fn)
   call adios_declare_group (adios_group, "EVENTS", "iter", 1, adios_err)
 	!print *,"Write out file: ", trim(asdf_fn)
@@ -379,7 +379,7 @@ subroutine write_asdf_file_sub (my_asdf, adios_handle, my_adios_group, adios_gro
 !				my_asdf%component_len, comp_len_total, comp_offset,&
 !				"component", my_asdf%component)
 
-  print *,"write_array"
+  print *,"write array"
   call write_adios_global_integer_1d_array(adios_handle, rank, nproc, my_asdf%nrecords,&
         nrecords_total, offset, "npoints", my_asdf%npoints)
 
@@ -535,16 +535,16 @@ subroutine gather_string_offset_info(local_dim, global_dim, offset,&
 
 	if(rank.eq.0)then
 		do i=1,nproc-1
-			print *, "buffer_before:",trim(buffer_string)
-			print *, "local_dim_all_proc:",local_dim_all_proc(i+1)
+			!print *, "buffer_before:",trim(buffer_string)
+			!print *, "local_dim_all_proc:",local_dim_all_proc(i+1)
 			call MPI_Recv(buffer_string, local_dim_all_proc(i+1), MPI_CHARACTER,&
 							i, 1, comm, mpi_status, ierr)
-			print *,"buffer_string:", trim(buffer_string)
+			!print *,"buffer_string:", trim(buffer_string)
 			string_total=trim(string_total)//buffer_string(1:local_dim_all_proc(i+1))
 		enddo
 	else
-		print *, "local_dim:", local_dim
-		print *,"string_piece:", trim(string_piece)
+		!print *, "local_dim:", local_dim
+		!print *,"string_piece:", trim(string_piece)
 		call MPI_Send(string_piece, local_dim, MPI_CHARACTER,&
 							0, 1, comm, ierr)
 	endif

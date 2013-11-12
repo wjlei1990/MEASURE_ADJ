@@ -68,21 +68,15 @@ program main
     print *, "Start Measure_Adj..."
     print *, "NPROC:", nproc
   endif
-	!----------.
-  !init adios!
-	!----------'
-  !call adios_init_noxml(comm, adios_err)
-  !call adios_allocate_buffer(100, adios_err)
-  !call adios_declare_group(adios_group,"EVENTS","iter",1,adios_err)
-  !call adios_select_method(adios_group,"MPI","","",adios_err)
-
-  !obsd_all%min_period=17.0
-  !obsd_all%max_period=60.0
 
   !--------------------------.
   !read main parfile         !
   !--------------------------'
-  print *,"Read in main Parfile..."
+  if(rank.eq.0)then
+    print *, "-----------------"
+    print *,"Read in main Parfile..."
+    print *, "-----------------"
+  endif
   call read_main_parfile_mpi(rank,comm,ierr)
   !stop
 
@@ -90,8 +84,11 @@ program main
   !read in asdf data         !
   !--------------------------'
 	if(rank.eq.0) then
+    print *, "-----------------"
+    print *, "Read in file"
   	print *, "OBSD_FILE: ",trim(OBSD_FILE)
 		print *, "SYNT_FILE: ",trim(SYNT_FILE)
+    print *, "-----------------"
 	endif
   call read_asdf_file(OBSD_FILE,obsd_all,rank,nproc,comm,ierr)
   print *, "read obsd finished!"
@@ -109,13 +106,16 @@ program main
   !--------------------------.
   !read parfile              !
   !--------------------------'
-  print *,"Read in Measure_Adj Parfile..."
+  if(rank.eq.0) then
+    print *,"----------------------------------"
+    print *,"Read in Measure_Adj Parfile..."
+    print *,"----------------------------------"
+  endif
   call read_ma_parfile_mpi(measure_adj_par_all, obsd_all%min_period,&
         obsd_all%max_period, obsd_all%event_dpt, obsd_all%nrecords,&
         rank, comm, ierr)
 
 	call MPI_Barrier(comm,ierr)
- 	print *, "rank, number of records: ", rank, obsd_all%nrecords
 
   allocate(win_all(obsd_all%nrecords))
   allocate(win_chi_all(obsd_all%nrecords))
@@ -123,9 +123,11 @@ program main
   !--------------------------.
   !read in the win           !
   !--------------------------'
-  print *,"----------------------------------"
-  print *,"READ WIN FILE                     "
-  print *,"----------------------------------"
+	if(rank.eq.0)then
+    print *,"----------------------------------"
+    print *,"READ WIN FILE                     "
+    print *,"----------------------------------"
+  endif
   call win_read(WIN_DIR, obsd_all%event, obsd_all%min_period,&
                 obsd_all%max_period, win_all,&
                 obsd_all%nrecords, rank, ierr)
@@ -156,8 +158,6 @@ program main
 
   allocate(adj_source(measure_adj_par_all%Z%nn))
 
-	!if(rank==1) then
-  print *, "GO into the measure_adj"
   do i=1, obsd_all%nrecords
     !call measure_adj subroutine
     call measure_adj(obsd_all%records(i)%record,obsd_all%npoints(i),obsd_all%begin_value(i),obsd_all%sample_rate(i),&
@@ -187,17 +187,14 @@ program main
 
 	call MPI_Barrier(comm, ierr)
 
-  !print *,"win_all Z:", win_all(1)%num_win
-  !print *,"win_all R:", win_all(2)%num_win
-  !print *,"win_all T:", win_all(3)%num_win
-
   !--------------------------.
   !rotate                    !
   !--------------------------'
   if(ROTATE_COMP) then
-    print *, "ROTATE:"
+    if(rank.eq.0)then
+      print *, "ROTATE:"
+    endif
     call rotate_adj(adj_all, adj_all_rotate)
-    print *, "ROTATE finished"
   endif
 
   !--------------------------.
@@ -214,8 +211,12 @@ program main
     p2_string=adjustl(p2_string)
     ADJ_FILE=trim(MEASURE_ADJ_OUTDIR)//'/'//trim(obsd_all%event)//&
       '_'//trim(p1_string)//'_'//trim(p2_string)//'.bp'
-    
-    print *,"ADJ_FILE:",trim(ADJ_FILE)
+   
+    if(rank.eq.0)then
+      print *,"------------------"
+      print *,"begin write out"
+      print *,"ADJ_FILE:",trim(ADJ_FILE)
+    endif
 
     if(ROTATE_COMP) then
       call write_asdf_file (ADJ_FILE, adj_all_rotate, rank, nproc, comm, ierr)
@@ -225,7 +226,7 @@ program main
   endif
 
   if(WRITE_NORMAL_OUTPUT) then
-    print *, "Write out normal ascii output file(adj_source)"
+    if(rank.eq.0) print *, "Write out normal ascii output file(adj_source)"
   	call write_ascii_output(adj_all, measure_adj_outdir)
     call write_ascii_output(adj_all_rotate, measure_adj_outdir)
   endif

@@ -11,9 +11,9 @@ ROTATE_COMP                 = .TRUE.
 WRITE_NORMAL_OUTPUT         = .false.
 
 #input info
-OBSD_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_obs.bp 
-SYNT_FILE                   = /tigress/lei/ASDF/SAC_TO_ASDF_CONVERTER/200801151752A_sem.bp 
-WIN_DIR                     = /tigress/lei/ASDF/FLEXWIN/OUTPUT/200801151752A_17_60
+OBSD_FILE                   = DATA/example_data/200801151752A_obs.bp 
+SYNT_FILE                   = DATA/example_data/200801151752A_sem.bp 
+WIN_DIR                     = DATA/example_data
 
 #output
 MEASURE_ADJ_OUTDIR          = OUTPUT

@@ -8,3 +8,5 @@ Measure_adj
 *.winchi
 *.win.dat
 OUTPUT/
+cpu_time
+log
