@@ -29,6 +29,7 @@ contains
 
 subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
               syn_in,npt2_in,t02_in,dt2_in, &
+              syn_phydisp_in, npt3_in, t03_in, dt3_in, &
               dist_in, sta, net, chan_dat, &
               win_all, ma_par_all, weighting_par, weighting_option, &
               win_chi_all, adj_source)
@@ -66,10 +67,10 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
 
   implicit none
 
-  real, intent(in) :: data_in(*), syn_in(*)
-  real :: t01_in, dt1_in, t02_in, dt2_in
+  real, intent(in) :: data_in(*), syn_in(*), syn_phydisp_in(*)
+  real :: t01_in, dt1_in, t02_in, dt2_in, t03_in, dt3_in
   real :: dist_in
-  integer :: npt1_in, npt2_in
+  integer :: npt1_in, npt2_in, npt3_in
   character(len=*) :: sta, net, chan_dat
 
   type(ma_par_struct_all) :: ma_par_all
@@ -144,9 +145,10 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
     call copy_ma_par_to_local(ma_par_all,chan_dat,fstart0,fend0,tt,dtt,nn,chan)
     !print *,"Just start"
     call copy_argu_to_local_and_check(data_in,npt1_in,t01_in,dt1_in, &
-          syn_in,npt2_in,t02_in,dt2_in,dist_in, &
-          data,npt1,t01,dt1,syn,npt2,t02,dt2,dist,&
-          npts,dt,t0,nerr)
+          syn_in,npt2_in,t02_in,dt2_in,&
+          syn_phydisp_in,npt3_in,t03_in,dt3_in, dist_in, &
+          data,npt1,t01,dt1,syn,npt2,t02,dt2,syn_phydisp,npt3,t03,dt3,&
+          dist,npts,dt,t0,nerr)
     if(nerr.eq.1)then
       print *, "Error in obsd and synt!"
       adj_source(1:nn) = 0.0
@@ -213,7 +215,6 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
     !t0 = t01
 
     if (DISPLAY_DETAILS) print *,'  time, dt, npts :',sngl(t01), sngl(dt), npts
-    
 
     ! apply bandpass filter to data and synthetics with saclib, if desired
     ! http://www.iris.washington.edu/pipermail/sac-help/2008-March/000376.html
@@ -580,22 +581,23 @@ end subroutine measure_adj
 
 !end subroutine copy_measure_adj_par
 subroutine copy_argu_to_local_and_check(data_in,npt1_in,t01_in,dt1_in, &
-              syn_in,npt2_in,t02_in,dt2_in,dist_in, &
-              data,npt1,t01,dt1,syn,npt2,t02,dt2,dist, &
-              npts,dt,t0,nerr) 
+              syn_in,npt2_in,t02_in,dt2_in, &
+              syn_phydisp_in,npt3_in,t03_in,dt3_in,dist_in, &
+              data,npt1,t01,dt1,syn,npt2,t02,dt2,syn_phydisp,npt3,t03,dt3,&
+              dist,npts,dt,t0,nerr) 
   
   use ma_sub2, only : TOL
   use ma_constants, only : NDIM
   
-  real, intent(in) :: data_in(*), syn_in(*)
-  real :: t01_in, dt1_in, t02_in, dt2_in
+  real, intent(in) :: data_in(*), syn_in(*), syn_phydisp_in(*)
+  real :: t01_in, dt1_in, t02_in, dt2_in, t03_in, dt3_in
   real :: dist_in
-  integer :: npt1_in, npt2_in
+  integer :: npt1_in, npt2_in, npt3_in
 
-  double precision, dimension(NDIM) :: data, syn
-  double precision :: t01, t02, dt1, dt2
+  double precision, dimension(NDIM) :: data, syn, syn_phydisp
+  double precision :: t01, t02, t03, dt1, dt2, dt3
   double precision :: dist
-  integer :: npt1, npt2
+  integer :: npt1, npt2, npt3
 
   integer :: npts
   double precision :: dt,t0

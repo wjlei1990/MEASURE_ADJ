@@ -11,13 +11,17 @@ ROTATE_COMP                 = .TRUE.
 WRITE_NORMAL_OUTPUT         = .false.
 
 #input info
-OBSD_FILE                   = DATA/example_data/200801151752A_obs.bp 
-SYNT_FILE                   = DATA/example_data/200801151752A_sem.bp 
-WIN_DIR                     = DATA/example_data
+OBSD_FILE                   = ../../DATA/PROC/T027-060s/200801151752A_obs.sac.bp 
+SYNT_FILE                   = ../../DATA/PROC/T027-060s/200801151752A_sem.sac.bp 
+SYNT_PHYDISP_FILE           = DATA/example_data/200801151752A_sem.phydisp.bp
+WIN_DIR                     = ../../window/200801151752A_27_60
 
 #output
 MEASURE_ADJ_OUTDIR          = OUTPUT
 
 #some other options
 WEIGHTING_OPTION            = 1
+
+#use physical dispersion or not
+USE_PHYDISP                 = .false.
 
