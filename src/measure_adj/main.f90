@@ -33,14 +33,14 @@ program main
 
   !this is the input file name
   !character(len=120) :: input_fn='input_cmt_LHZ_17_60'
-  character(len=150)      :: OBSD_FILE, SYNT_FILE, ADJ_FILE
+  character(len=150)      :: OBSD_FILE, SYNT_FILE, SYNT_PHYDISP_FILE, ADJ_FILE
   character(len=150)      :: WIN_FILE
   !this is the output directory
   character(len=150)      :: OUTDIR
   !just for test use
   character(len=150)      :: OUTFN
   !variables
-  type(asdf_event)        :: synt_all,obsd_all,adj_all
+  type(asdf_event)        :: synt_all,synt_phydisp_all,obsd_all,adj_all
   type(win_info),allocatable      :: win_all(:)
   type(win_chi_info), allocatable :: win_chi_all(:)
   type(ma_par_struct_all) :: measure_adj_par_all
@@ -69,10 +69,13 @@ program main
 
   OBSD_FILE='./DATA/test/200801151752A_obsd.bp'
   SYNT_FILE='./DATA/test/200801151752A_synt.bp'
+  SYNT_PHYDISP_FILE=''
   ADJ_FILE ='./output/200801151752A_adj.bp'
   WIN_FILE='./200801151752A_1.win.mat'
   OUTDIR='./output'
 
+  print *,"Read ma parfile Begin!"
+  call read_ma_parfile(measure_adj_par_all, 17.0, 60.0)
   !==============================================
   !read in the obsd and synt
   !call ADIOS_read(obsd_all,synt_all,input_fn)
@@ -118,10 +121,8 @@ program main
 
   !==============================================
   !start measure_adj part
-  print *,"Read ma parfile Begin!"
   !call read_ma_parfile(measure_adj_par_all,obsd_all%min_period,&
   !                          obsd_all%max_period)
-  call read_ma_parfile(measure_adj_par_all, 17.0, 60.0)
   print *,"Read ma parfile finished!"
   print *,"Weighting Begin!"
   call setup_measure_adj_weighting_asdf(win_all,obsd_all%nrecords, &

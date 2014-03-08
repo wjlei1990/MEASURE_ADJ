@@ -28,6 +28,7 @@ subroutine read_main_parfile_mpi(rank, comm, ierr)
   call MPI_Bcast(MEASURE_ADJ_OUTDIR,150,MPI_CHARACTER,0,comm,ierr)
 
   call MPI_Bcast(WEIGHTING_OPTION,1,MPI_INTEGER,0,comm,ierr)
+  call MPI_Bcast(USE_PHYDISP, 1, MPI_LOGICAL, 0, comm, ierr)
 	!if(rank.eq.1) then
 	!	print *, "MPI_staff"
 	!	print *, RUN_FLEXWIN, RUN_MEASURE_ADJ, WRITE_ADJ_ASDF,&
@@ -81,22 +82,28 @@ subroutine read_main_parfile(ierr)
 	print *, "OBSD_FILE: ", trim(OBSD_FILE)
 	read(IIN,2) dummy_string, SYNT_FILE
 	print *, "SYNT_FILE: ", trim(SYNT_FILE)
+	read(IIN,2) dummy_string, SYNT_PHYDISP_FILE
+	print *, "SYNT_PHYDISP_FILE: ", trim(SYNT_PHYDISP_FILE)
 	read(IIN,2) dummy_string, WIN_DIR 
 	print *, "WIN_DIR: ", trim(WIN_DIR)
 
   do i=1,2
     read(IIN,*)
   enddo
-
 	read(IIN,2) dummy_string, MEASURE_ADJ_OUTDIR
 	print *, "MEASURE_ADJ_OUTDIR: ", trim(MEASURE_ADJ_OUTDIR)
 
   do i=1,2
     read(IIN,*)
   enddo
-
   read(IIN,4) dummy_string, weighting_option
   print *, "weighting_option: ", weighting_option
+
+  do i=1,2
+    read(IIN,*)
+  enddo
+  read(IIN,3) dummy_string, USE_PHYDISP
+  print *, "use physical dispersion", USE_PHYDISP
 
 2 format(a,a)
 3 format(a,l20)
@@ -109,7 +116,7 @@ end subroutine read_main_parfile
 
 subroutine read_ma_parfile_mpi(ma_par_all, min_period, &
              max_period, event_dpt, nrecords, &
-             rank, comm, ierr)
+             USE_PHYDISP, rank, comm, ierr)
 
 	use ma_struct
   use measure_adj_subs
@@ -118,6 +125,7 @@ subroutine read_ma_parfile_mpi(ma_par_all, min_period, &
 
 	type(ma_par_struct_all) :: ma_par_all
 	real :: min_period, max_period, event_dpt(:)
+  logical :: USE_PHYDISP
 	integer :: rank, comm, ierr
   integer :: nrecords
   
@@ -195,6 +203,10 @@ subroutine read_ma_parfile_mpi(ma_par_all, min_period, &
   ma_par_all%R=ma_par_temp(1)
   ma_par_all%T=ma_par_temp(2)
   ma_par_all%Z=ma_par_temp(3)
+
+  ma_par_all%R%USE_PHYSICAL_DISPERSION=USE_PHYDISP
+  ma_par_all%T%USE_PHYSICAL_DISPERSION=USE_PHYDISP
+  ma_par_all%Z%USE_PHYSICAL_DISPERSION=USE_PHYDISP
 
 	!if(rank==1) then
 		!print *, "CHECK"
@@ -326,18 +338,18 @@ subroutine copy_general_info_to_adj(obsd, adj)
   adj%min_period=obsd%min_period
   adj%max_period=obsd%max_period
 
-  adj%receiver_name=""
-  adj%network=""
-  adj%component=""
-  adj%receiver_id=""
+  !adj%receiver_name=""
+  !adj%network=""
+  !adj%component=""
+  !adj%receiver_id=""
 
-  adj%receiver_name=obsd%receiver_name
-  adj%network=obsd%network
-  adj%component=obsd%component
-  adj%receiver_id=obsd%receiver_id
+  !adj%receiver_name=obsd%receiver_name
+  !adj%network=obsd%network
+  !adj%component=obsd%component
+  !adj%receiver_id=obsd%receiver_id
 
-  print *, trim(obsd%receiver_id)
-  print *, trim(adj%receiver_id)
+  !print *, trim(obsd%receiver_id)
+  !print *, trim(adj%receiver_id)
 
   do i=1,obsd%nrecords
     adj%receiver_lat(:)=obsd%receiver_lat(:)

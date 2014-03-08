@@ -1,7 +1,7 @@
 module rotate_subs
 
   use asdf_data
-  use asdf_subs
+  use asdf_read_subs
   implicit none
 
 contains

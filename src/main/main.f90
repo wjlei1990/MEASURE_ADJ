@@ -22,7 +22,8 @@ program main
   use ma_struct
 
   use win_io
-  use asdf_subs
+  use asdf_read_subs
+  use asdf_write_subs
 
   use measure_adj_subs
   use rotate_subs
@@ -34,7 +35,8 @@ program main
   implicit none
   include 'mpif.h'
 
-  type(asdf_event)        :: synt_all, obsd_all, adj_all, adj_all_rotate
+  type(asdf_event)        :: synt_all, obsd_all, synt_phydisp_all
+  type(asdf_event)        :: adj_all, adj_all_rotate
   type(win_info),allocatable      :: win_all(:)
   type(win_chi_info), allocatable :: win_chi_all(:)
   type(ma_par_struct_all) 				:: measure_adj_par_all
@@ -42,13 +44,16 @@ program main
 
   character(len=200) :: ADJ_FILE
 
+  integer :: nrecords
+  character(len=20) :: station(MAXDATA_PER_PROC), network(MAXDATA_PER_PROC)
+  character(len=20) :: component(MAXDATA_PER_PROC), receiver_id(MAXDATA_PER_PROC)
+
   real, allocatable :: adj_source(:)
   !mpi_var
   integer                 :: nproc,comm,rank
   integer                 :: ierr, adios_err
   !adios_var
-  integer(kind=8)         :: adios_groupsize, adios_totalsize
-  integer(kind=8)         :: adios_handle, adios_group
+  integer(kind=8)         :: adios_group
 
   integer                 :: i
 
@@ -68,6 +73,12 @@ program main
     print *, "Start Measure_Adj..."
     print *, "NPROC:", nproc
   endif
+
+  !init adios
+  call adios_init_noxml(comm, adios_err)
+  call adios_allocate_buffer(600, adios_err)
+  call adios_declare_group(adios_group, "EVENTS", "iter", 1, adios_err)
+  call adios_select_method(adios_group, "MPI", "", "", adios_err)
 
   !--------------------------.
   !read main parfile         !
@@ -90,10 +101,25 @@ program main
 		print *, "SYNT_FILE: ",trim(SYNT_FILE)
     print *, "-----------------"
 	endif
-  call read_asdf_file(OBSD_FILE,obsd_all,rank,nproc,comm,ierr)
+  call read_asdf_file(OBSD_FILE, obsd_all, nrecords, &
+    station, network, component, receiver_id, 0, &
+    rank, nproc, comm, ierr)
   print *, "read obsd finished!"
-  call read_asdf_file(SYNT_FILE,synt_all,rank,nproc,comm,ierr)
+  call read_asdf_file(SYNT_FILE, synt_all, nrecords, &
+    station, network, component, receiver_id, 1, &
+    rank, nproc, comm, ierr)
   print *, "read synt finished!"
+  if(USE_PHYDISP)then
+    call read_asdf_file(SYNT_PHYDISP_FILE, synt_phydisp_all, nrecords, &
+    station, network, component, receiver_id, 1, &
+    rank, nproc, comm, ierr)
+  else
+    !if no, just init synt_phydisp_all, and use it as dummy
+    call init_asdf_data(synt_phydisp_all, nrecords)
+    do i=1,nrecords
+      allocate(synt_phydisp_all%records(i)%record(1))
+    enddo
+  endif
 	if(rank.eq.0) then
   	print *, "/event:", trim(obsd_all%event)
 	endif
@@ -113,7 +139,7 @@ program main
   endif
   call read_ma_parfile_mpi(measure_adj_par_all, obsd_all%min_period,&
         obsd_all%max_period, obsd_all%event_dpt, obsd_all%nrecords,&
-        rank, comm, ierr)
+        USE_PHYDISP, rank, comm, ierr)
 
 	call MPI_Barrier(comm,ierr)
 
@@ -150,7 +176,7 @@ program main
          ma_weighting_par,weighting_option, &
          rank, comm, ierr)
 
-  !print *, "Weighting finished!"
+  print *, "Weighting finished!"
   call init_asdf_data(adj_all, obsd_all%nrecords)
 
 	call MPI_Barrier(comm, ierr)
@@ -162,6 +188,7 @@ program main
     !call measure_adj subroutine
     call measure_adj(obsd_all%records(i)%record,obsd_all%npoints(i),obsd_all%begin_value(i),obsd_all%sample_rate(i),&
       synt_all%records(i)%record,synt_all%npoints(i),synt_all%begin_value(i),synt_all%sample_rate(i),&
+      synt_phydisp_all%records(i)%record,synt_phydisp_all%npoints(i),synt_phydisp_all%begin_value(i),synt_phydisp_all%sample_rate(i),&
       obsd_all%great_circle_arc(i),obsd_all%receiver_name_array(i),obsd_all%network_array(i),obsd_all%component_array(i),&
       win_all(i),measure_adj_par_all, ma_weighting_par, weighting_option,&
       win_chi_all(i), adj_source)
@@ -204,7 +231,7 @@ program main
   !write out
   !>begin write out the adj_all
   
-    adios_groupsize = 0.
+    !adios_groupsize = 0.
     write(p1_string,'(I8)') int(obsd_all%min_period)
     write(p2_string,'(I8)') int(obsd_all%max_period)
     p1_string=adjustl(p1_string)
@@ -219,9 +246,11 @@ program main
     endif
 
     if(ROTATE_COMP) then
-      call write_asdf_file (ADJ_FILE, adj_all_rotate, rank, nproc, comm, ierr)
+      call write_asdf_file (ADJ_FILE, adj_all_rotate, adios_group, &
+              rank, nproc, comm, ierr)
     else
-      call write_asdf_file (ADJ_FILE, adj_all, rank, nproc, comm, ierr)
+      call write_asdf_file (ADJ_FILE, adj_all, adios_group, &
+              rank, nproc, comm, ierr)
     endif
   endif
 
@@ -235,6 +264,7 @@ program main
   !finalize mpi              !
   !--------------------------'
   call MPI_Barrier(comm,ierr)
+  call adios_finalize(rank, ierr)
   call mpi_finalize(ierr)
 
 	call CPU_TIME(t2)

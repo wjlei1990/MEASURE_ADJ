@@ -34,12 +34,12 @@ module asdf_data
     real, allocatable       :: P_pick(:), S_pick(:)
 
     !string, name, etc
-    integer    :: receiver_name_len, network_len
-    integer    :: component_len,receiver_id_len
-    character(len=:),allocatable :: receiver_name
-    character(len=:),allocatable :: network
-    character(len=:),allocatable :: component
-    character(len=:),allocatable :: receiver_id
+    !integer    :: receiver_name_len, network_len
+    !integer    :: component_len,receiver_id_len
+    !character(len=:),allocatable :: receiver_name
+    !character(len=:),allocatable :: network
+    !character(len=:),allocatable :: component
+    !character(len=:),allocatable :: receiver_id
 
     character(len=20),allocatable :: receiver_name_array(:), network_array(:)
     character(len=20),allocatable :: component_array(:), receiver_id_array(:)
