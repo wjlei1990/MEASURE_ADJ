@@ -705,10 +705,10 @@ subroutine split_job_mpi_on_sta_info(nrecords_total, receiver_name,&
   call split_string(receiver_id,receiver_id_len, &
                             rid_total,dim_array,'.')
 
-                            
   !do i=1, nrecords_total
   !  print *, "sta2:", trim(sta_total(i)),'.',trim(nw_total(i)),'.',trim(comp_total(i)),'.'
   !enddo
+                            
 
 !  print *,"here"
   do i=1, nrecords_total
@@ -762,8 +762,6 @@ subroutine split_job_mpi_on_sta_info(nrecords_total, receiver_name,&
     index_list(i)=index_list(i-1)+index_list(i)
   enddo
   !print *,"index_list:"
-  !print *, index_list(:)
-  !stop
 
   points_array(:)=-1
 !  print *, "points_array:", points_array(:)
