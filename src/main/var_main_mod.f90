@@ -7,6 +7,8 @@ module var_main
   character(len=150) :: WIN_DIR
 
   character(len=150) :: MEASURE_ADJ_OUTDIR
+  
+  real :: MIN_PERIOD, MAX_PERIOD
 
   integer :: weighting_option
 

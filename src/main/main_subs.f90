@@ -25,6 +25,9 @@ subroutine read_main_parfile_mpi(rank, comm, ierr)
   call MPI_Bcast(SYNT_FILE,150,MPI_CHARACTER,0,comm,ierr)
   call MPI_Bcast(WIN_DIR,150,MPI_CHARACTER,0,comm,ierr)
 
+  call MPI_Bcast(MIN_PERIOD, 1, MPI_REAL, 0, comm, ierr)
+  call MPI_Bcast(MAX_PERIOD, 1, MPI_REAL, 0, comm, ierr)
+
   call MPI_Bcast(MEASURE_ADJ_OUTDIR,150,MPI_CHARACTER,0,comm,ierr)
 
   call MPI_Bcast(WEIGHTING_OPTION,1,MPI_INTEGER,0,comm,ierr)
@@ -87,27 +90,31 @@ subroutine read_main_parfile(ierr)
 	read(IIN,2) dummy_string, WIN_DIR 
 	print *, "WIN_DIR: ", trim(WIN_DIR)
 
-  do i=1,2
-    read(IIN,*)
-  enddo
+  read(IIN,*)
+  read(IIN,*)
 	read(IIN,2) dummy_string, MEASURE_ADJ_OUTDIR
 	print *, "MEASURE_ADJ_OUTDIR: ", trim(MEASURE_ADJ_OUTDIR)
 
-  do i=1,2
-    read(IIN,*)
-  enddo
+  read(IIN,*)
+  read(IIN,*)
+  read(IIN,5) dummy_string, MIN_PERIOD
+  read(IIN,5) dummy_string, MAX_PERIOD
+  print *, "min and max period:", MIN_PERIOD, MAX_PERIOD
+
+  read(IIN,*)
+  read(IIN,*)
   read(IIN,4) dummy_string, weighting_option
   print *, "weighting_option: ", weighting_option
 
-  do i=1,2
-    read(IIN,*)
-  enddo
+  read(IIN,*)
+  read(IIN,*)
   read(IIN,3) dummy_string, USE_PHYDISP
-  print *, "use physical dispersion", USE_PHYDISP
+  print *, "use physical dispersiono:", USE_PHYDISP
 
 2 format(a,a)
 3 format(a,l20)
 4 format(a,i)
+5 format(a,F15.5)
 
   close(IIN)
 	!stop
@@ -240,9 +247,9 @@ subroutine write_win_chi(MEASURE_ADJ_OUTDIR, nrecords, &
   integer :: rank, ierr
 
   integer :: IIN=110
-  integer :: i,j,k
+  integer :: i,j,k,win_index
 
-  character(len=32) :: file_prefix 
+  character(len=32) :: file_prefix, outdir 
   character(len=250) :: fn, p1_string, p2_string, myid_string
 
   write(myid_string, '(I8)') rank
@@ -251,9 +258,10 @@ subroutine write_win_chi(MEASURE_ADJ_OUTDIR, nrecords, &
   myid_string=adjustl(myid_string)
   p1_string=adjustl(p1_string)
   p2_string=adjustl(p2_string)
+  outdir=MEASURE_ADJ_OUTDIR
   
-  call system('mkdir -p '//trim(MEASURE_ADJ_OUTDIR)//'/'//trim(event_name)//'')
-  fn=trim(MEASURE_ADJ_OUTDIR)//'/'//trim(event_name)//'/'//&
+  call system('mkdir -p '//trim(outdir)//'')
+  fn=trim(outdir)//'/'//&
       trim(event_name)//'_'//trim(p1_string)//'_'//&
       trim(p2_string)//'.'//trim(myid_string)//'.winchi'
   open(UNIT=IIN,file=fn)
@@ -281,6 +289,24 @@ subroutine write_win_chi(MEASURE_ADJ_OUTDIR, nrecords, &
     enddo
   enddo
 
+  close(IIN)
+  win_index=0
+  fn=trim(outdir)//'/'//&
+      trim(event_name)//'_'//trim(p1_string)//'_'//&
+      trim(p2_string)//'.'//trim(myid_string)//'.winindex'
+  open(UNIT=IIN,file=fn)
+  do i=1,nrecords
+    do j=1,win_all(i)%num_win
+      win_index=win_index+1
+      write(IIN,'(a3,a8,a5,3i5,2f12.3)') trim(net(i)),trim(sta(i)), &
+        trim(chan_syn(i)),win_index, i, j, win_all(i)%t_start(j), &
+        win_all(i)%t_end(j)
+    enddo
+  enddo
+
+  close(IIN)
+
+
 end subroutine write_win_chi
 
 
@@ -288,6 +314,7 @@ subroutine write_ascii_output(my_asdf, outdir)
 
   use asdf_data
   use ascii_rw
+  use ma_constants, only : DO_RAY_DENSITY_SOURCE
 
   type(asdf_event) :: my_asdf
   character(len=150) :: outdir

@@ -12,7 +12,7 @@ module ma_variables
 !
 ! See write_par_file.pl and measure_adj.f90
 
-  character(len=150) :: OUT_DIR='./OUTPUT_FILES'
+  character(len=150) :: OUT_DIR='./OUTPUT_FILES' !default, dummy through
 
   double precision :: TLONG, TSHORT
   double precision :: WTR, NPI, DT_FAC, ERR_FAC, DT_MAX_SCALE, NCYCLE_IN_WINDOW

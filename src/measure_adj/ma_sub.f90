@@ -1012,6 +1012,9 @@ contains
     dt1_sngl = real(dt1)
     dat_sngl = real(data)
 
+    !print *,"here"
+    !print *, trim(datafile)
+
     if (minmax_header) then
        ! get time vector
        ti_sngl = 0.

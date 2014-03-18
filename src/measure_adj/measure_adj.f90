@@ -32,7 +32,7 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
               syn_phydisp_in, npt3_in, t03_in, dt3_in, &
               dist_in, sta, net, chan_dat, &
               win_all, ma_par_all, weighting_par, weighting_option, &
-              win_chi_all, adj_source)
+              win_chi_all, adj_source, ma_outdir)
 
   !  main program that calls the subroutines to make measurements within input time windows
   !  and then compute the corresponding adjoint sources
@@ -82,7 +82,7 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
 
   real :: adj_source(:)
 
-
+  character(len=150),intent(in) :: ma_outdir
   character(len=150) :: datafile,synfile,synfile_phydisp,file_prefix,file_prefix0,file_prefix2,measure_file_prefix,adj_file_prefix
   integer :: num_meas, j, ios, npt1, npt2,npt3, npts, nn 
   double precision, dimension(NDIM) :: data, syn, syn_phydisp, adj_syn_all, &
@@ -251,7 +251,7 @@ subroutine measure_adj(data_in,npt1_in,t01_in,dt1_in, &
     ! example: OUT/PAS.CI.BHZ
     file_prefix0 = trim(sta)//'.'//trim(net)//'.'//trim(chan_syn)
     !print *, file_prefix0
-    file_prefix2 = trim(OUT_DIR)//'/'//trim(file_prefix0)
+    file_prefix2 = trim(ma_outdir)//'/'//trim(file_prefix0)
     !print *,trim(OUT_DIR)
     !print *
     !print *,  trim(file_prefix2), ' --- '
@@ -844,6 +844,7 @@ subroutine copy_ma_par_to_local(ma_par_all,chan_dat,fstart0,fend0,tt,dtt,nn,chan
   select case (chan_dat(3:3))
     case ("Z")
       ma_par=ma_par_all%Z
+    case ("R")
       ma_par=ma_par_all%R
     case ("T")
       ma_par=ma_par_all%T
