@@ -30,7 +30,8 @@ MPICC = mpicc
 CFLAGS= -g -O0 -check all
 
 _OBJ = ma_constants.o ma_variables.o ascii_rw.o \
-			 ma_sub2.o ma_sub.o measure_adj.o
+			 ma_sub2.o ma_sub.o measure_adj.o \
+			 mpi_weighting_subs.o rotate_subs.o
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 

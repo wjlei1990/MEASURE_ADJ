@@ -31,7 +31,7 @@ MPIFC = mpif90
 MPICC = mpicc
 CFLAGS= -g -O0 -check all
 
-_OBJ = mpi_weighting_subs.o rotate_subs.o var_main_mod.o main_subs.o main.o 
+_OBJ = var_main_mod.o main_subs.o main.o 
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 
@@ -82,7 +82,7 @@ print_var:
 	@echo $(all_obj)
 
 clean:
-	rm -f  ${LIB_ALL} ${PROGS} *.o *.mod *.a $(OBJDIR)/*
+	rm -f  ${LIB_ALL} ${PROG} *.o *.mod *.a $(OBJDIR)/*
 
 cleanall:
 	rm -f  iasp91.*

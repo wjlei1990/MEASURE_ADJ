@@ -21,7 +21,7 @@ program main
   use flexwin_struct
   use ma_struct
 
-  use win_io
+  use win_io_subs
   use asdf_read_subs
   use asdf_write_subs
 

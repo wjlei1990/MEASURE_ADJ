@@ -11,17 +11,17 @@ ROTATE_COMP                 = .TRUE.
 WRITE_NORMAL_OUTPUT         = .TRUE.
 
 #input info
-OBSD_FILE                   = ../../DATA/T027-060s/200802101222A_obs.sac.bp 
-SYNT_FILE                   = ../../DATA/T027-060s/200802101222A_sem.sac.bp 
-SYNT_PHYDISP_FILE           = ../../DATA/T027-060s/200802101222A_sem.phydisp.bp
-WIN_DIR                     = ../../window/200802101222A_27_60
+OBSD_FILE                   = ../../DATA/T060-120s/200802101222A_obs.sac.bp 
+SYNT_FILE                   = ../../DATA/T060-120s/200802101222A_sem.sac.bp 
+SYNT_PHYDISP_FILE           = ../../DATA/T060-120s/200802101222A_sem.phydisp.bp
+WIN_DIR                     = ../../window/200802101222A_60_120
 
 #output
 MEASURE_ADJ_OUTDIR          = OUTPUT
 
 #Period information
-MIN_PERIOD                  = 27.0
-MAX_PERIOD                  = 60.0
+MIN_PERIOD                  = 60.0
+MAX_PERIOD                  = 120.0
 
 #some other options
 WEIGHTING_OPTION            = 1
