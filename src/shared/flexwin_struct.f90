@@ -5,6 +5,7 @@ module flexwin_struct
     integer :: num_win
     double precision,allocatable :: t_start(:)
     double precision,allocatable :: t_end(:)
+    double precision, allocatable :: tshift(:), cc(:), dlnA(:) 
   end type win_info
 
   !type win_chi_info
@@ -15,7 +16,7 @@ module flexwin_struct
   !end type win_chi_info
 
   type flexwin_par_struct
-		sequence
+    sequence
     logical :: DEBUG
     logical :: MAKE_SEISMO_PLOTS
     logical :: MAKE_WINDOW_FILES
@@ -37,7 +38,7 @@ module flexwin_struct
   end type flexwin_par_struct
 
   type flexwin_par_struct_all
-		sequence
+    sequence
     type(flexwin_par_struct) :: T
     type(flexwin_par_struct) :: R
     type(flexwin_par_struct) :: Z

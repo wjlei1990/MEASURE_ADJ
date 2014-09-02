@@ -25,7 +25,7 @@ subroutine setup_measure_adj_weighting_asdf_mpi(win,npairs,dist,chan_array,&
   type(win_info),intent(in) :: win(:)
   integer,intent(in) :: npairs
   character(len=*), intent(in) :: chan_array(:)
-  real,intent(in) :: dist(:)
+  double precision,intent(in) :: dist(:)
   integer, intent(in) :: comm, rank
   integer, intent(in) :: weighting_option !actually this hasn't been used here
 

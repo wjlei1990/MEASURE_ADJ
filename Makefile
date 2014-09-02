@@ -6,7 +6,7 @@ SRCDIR = ./src/main
 #IDIR   = $(PWD)/UTILS/include
 #EVALLIB=/home/lei/ASDF/evalresp/.libs
 
-CFLAGS = -check
+CFLAGS = -check all,noarg_temp_created
 
 # new version with default sac libraries
 TAULIBDIR=$(PWD)/ttimes_mod
@@ -29,9 +29,9 @@ FC = ifort
 CC = icc
 MPIFC = mpif90
 MPICC = mpicc
-CFLAGS= -g -O0 -check all
+CFLAGS= -g -O0 -check noarg_temp_created
 
-_OBJ = var_main_mod.o main_subs.o main.o 
+_OBJ = main_subs.o main.o 
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 

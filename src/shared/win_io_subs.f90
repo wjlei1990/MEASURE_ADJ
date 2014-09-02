@@ -1,9 +1,9 @@
 module win_io_subs
 
-	!use asdf_data
+  !use asdf_data
   use flexwin_struct
-	!use user_parameters
-	implicit none
+  !use user_parameters
+  implicit none
 
 contains
 
@@ -15,7 +15,7 @@ contains
     character(len=*) :: OUTDIR
     integer :: nrecords
     character(len=*),intent(in) :: event
-    real :: p1, p2
+    double precision :: p1, p2
     type(win_info),intent(in) :: win(:)
     !type(asdf_event),intent(in) :: obsd_all
     character(len=*) :: receiver_name(:), network(:)
@@ -75,7 +75,7 @@ contains
     character(len=*) :: OUTDIR_BASE
     integer :: nrecords
     character(len=*),intent(in) :: event
-    real :: p1, p2
+    double precision :: p1, p2
     type(win_info),intent(in) :: win(:)
     !type(asdf_event),intent(in) :: obsd_all
     character(len=*) :: receiver_name(:), network(:)
@@ -123,11 +123,14 @@ contains
       !  write(OON,*)win(i)%num_win
       if(win(i)%num_win.gt.0)then
         do j=1,win(i)%num_win
-          write(OON,*) j,win(i)%t_start(j),win(i)%t_end(j)
+          write(OON,21) j,win(i)%t_start(j),win(i)%t_end(j), &
+            win(i)%tshift(j), win(i)%cc(j), win(i)%dlnA(j)
         enddo
       endif
       close(OON)
     enddo
+
+21 format(I4, 5F12.4)
   
   end subroutine win_write_single_file
 
@@ -137,7 +140,7 @@ contains
                         nrecords,rank,ierr)
 
     character(len=*) :: FLEXWIN_OUTDIR
-    real :: p1, p2
+    double precision :: p1, p2
     character(len=*) :: event
     type(win_info), allocatable :: win_all(:)
     integer :: nrecords
@@ -145,9 +148,10 @@ contains
 
     character(len=150) :: dummy, p1_string, p2_string
     character(len=150) :: WIN_FILE
-    integer :: i,j
+    integer :: i,j, int_dummy
     integer :: num_win
     integer :: IIN=110
+    double precision :: tshift,cc, dlnA
 
     write(dummy,'(I6)') rank
     write(p1_string,'(I6)') int(p1)
@@ -156,22 +160,27 @@ contains
     p1_string=adjustl(p1_string)
     p2_string=adjustl(p2_string)
 
-    WIN_FILE=trim(FLEXWIN_OUTDIR) !//'/'//trim(event)//'_'//&
-             ! trim(p1_string)//'_'//trim(p2_string)
-    WIN_FILE=trim(WIN_FILE)//'/'//trim(dummy)//'.win.mat'
+    WIN_FILE=trim(FLEXWIN_OUTDIR)//'/'//trim(event)//'_'//&
+              trim(p1_string)//'_'//trim(p2_string)
+    WIN_FILE=trim(WIN_FILE)//'/'//trim(dummy)//'.win.dat'
+    print *, trim(WIN_FILE)
 
     !print *, "inside win_read"
     open(unit=IIN,file=WIN_FILE)
+    read(IIN, *, iostat=ierr) int_dummy
+    print *, int_dummy
     do i=1, nrecords
       read(IIN, *, iostat=ierr) dummy
+      print *,"dummy:",trim(dummy)
       read(IIN, *, iostat=ierr) num_win
-      !print *, "i_records=",i,"num_win=",num_win
+      print *, "i_records=",i,"num_win=",num_win
       win_all(i)%num_win=num_win
       !allocate the t_start and t_end
       allocate(win_all(i)%t_start(num_win))
       allocate(win_all(i)%t_end(num_win))
       do j=1, num_win
         read(IIN,*, iostat=ierr) win_all(i)%t_start(j),win_all(i)%t_end(j)
+        !tshift, cc, dlnA
       enddo
     enddo
     close(IIN)

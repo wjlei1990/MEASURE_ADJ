@@ -46,6 +46,7 @@ module adios_helpers_writers_mod
   public :: write_adios_global_integer_1d_array
   public :: write_adios_global_long_1d_array
   public :: write_adios_global_logical_1d_array
+  public :: write_adios_global_byte_1d_array
   public :: write_adios_global_string_1d_array
   public :: write_adios_global_1d_array
 
@@ -69,6 +70,10 @@ module adios_helpers_writers_mod
     module procedure write_adios_global_1d_logical_1d
   end interface write_adios_global_logical_1d_array
 
+  interface write_adios_global_byte_1d_array
+    module procedure write_adios_global_1d_byte_1d
+  end interface write_adios_global_byte_1d_array
+
   interface write_adios_global_string_1d_array
     module procedure write_adios_global_1d_string_1d
   end interface write_adios_global_string_1d_array
@@ -80,13 +85,14 @@ module adios_helpers_writers_mod
 
     module procedure write_adios_global_1d_logical_1d
 
+    module procedure write_adios_global_1d_byte_1d
+
     module procedure write_adios_global_1d_real_1d
 
     module procedure write_adios_global_1d_double_1d
   end interface write_adios_global_1d_array
 
 contains
-
 
 !===============================================================================
 subroutine write_1D_global_array_adios_dims(adios_handle, myrank, &
@@ -109,7 +115,6 @@ subroutine write_1D_global_array_adios_dims(adios_handle, myrank, &
   call adios_write(adios_handle, trim(path)// "/offset", &
                    offset, adios_err)
 end subroutine write_1D_global_array_adios_dims
-
 
 !===============================================================================
 !> Schedule an ADIOS single precision global 1d array for write
@@ -226,7 +231,6 @@ subroutine write_adios_global_1d_long_1d(adios_handle, myrank, sizeprocs, &
   call adios_write(adios_handle, trim(array_name)// "/array", array, adios_err)
 end subroutine write_adios_global_1d_long_1d
 
-
 !===============================================================================
 !> Schedule an ADIOS logical global 1d array for write
 !! \param adios_handle The adios handle to the file to be written
@@ -255,6 +259,23 @@ subroutine write_adios_global_1d_logical_1d(adios_handle, myrank, sizeprocs, &
   call adios_write(adios_handle, trim(array_name)// "/array", array, adios_err)
 end subroutine write_adios_global_1d_logical_1d
 
+!==============================================================================
+! byte array added
+subroutine write_adios_global_1d_byte_1d(adios_handle, myrank, sizeprocs, &
+    local_dim, global_dim, offset, array_name, array)
+  ! Parameters
+  integer(kind=8), intent(in) :: adios_handle
+  integer, intent(in) :: myrank, sizeprocs, local_dim
+  integer, intent(in) :: global_dim, offset
+  character(len=*) :: array_name
+  character(len=*), intent(in) :: array
+  ! Variables
+  integer :: adios_err
+
+  call write_1D_global_array_adios_dims(adios_handle, myrank, &
+      local_dim, global_dim, offset, sizeprocs, array_name)
+  call adios_write(adios_handle, trim(array_name)// "/array", array, adios_err)
+end subroutine write_adios_global_1d_byte_1d
 
 !===============================================================================
 !string subroutine added
@@ -269,8 +290,6 @@ subroutine write_adios_global_1d_string_1d(adios_handle, myrank, sizeprocs, &
   ! Variables
   integer :: adios_err
 
-	print *,"tag2:",trim(array_name)
-	print *,"tag2:",trim(array)
   call write_1D_global_array_adios_dims(adios_handle, myrank, &
       local_dim, global_dim, offset, sizeprocs, array_name)
   call adios_write(adios_handle, trim(array_name)// "/array", array(1:local_dim), adios_err)

@@ -30,7 +30,8 @@ MPICC = mpicc
 CFLAGS= -g -O0 -check all
 
 _OBJ = flexwin_struct.o ma_struct.o \
-			 win_io_subs.o distaz.o
+			 win_io_subs.o distaz.o \
+			 var_main_mod.o
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 

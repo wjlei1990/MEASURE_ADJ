@@ -1,20 +1,30 @@
 module asdf_data
 
+  !max number of records on one processor
+  integer, parameter :: MAXDATA_PER_PROC = 30000
+  !max number of records in one asdf file
+  integer, parameter :: MAXDATA_TOTAL = 90000
+
   type asdf_record
-    real, allocatable :: record(:)
+    real(kind=8), allocatable :: record(:)
   end type asdf_record
+
+  type asdf_response
+    character(len=500000) :: response_string
+    integer :: response_length
+  end type asdf_response
 
   type asdf_event
     ! scalars
     character(len=13)     :: event
-    real, allocatable     :: event_lat(:), event_lo(:), event_dpt(:)
+    real(kind=8), allocatable     :: event_lat(:), event_lo(:), event_dpt(:)
 
     !size info
     integer           :: nrecords
     integer           :: nreceivers
 
     !Processing info
-    real              :: min_period, max_period
+    real(kind=8)              :: min_period, max_period
 
     !time info
     integer, allocatable    :: gmt_year(:), gmt_day(:), gmt_hour(:)
@@ -22,30 +32,26 @@ module asdf_data
 
     !seismic record info
     integer, allocatable    :: npoints(:)
-    real, allocatable       :: receiver_lat(:), receiver_lo(:)
-    real, allocatable       :: receiver_el(:),  receiver_dpt(:)
-    real, allocatable       :: begin_value(:),  end_value(:)
-    real, allocatable       :: cmp_azimuth(:),  cmp_incident_ang(:)
-    real, allocatable       :: sample_rate(:),  scale_factor(:)
+    real(kind=8), allocatable       :: receiver_lat(:), receiver_lo(:)
+    real(kind=8), allocatable       :: receiver_el(:),  receiver_dpt(:)
+    real(kind=8), allocatable       :: begin_value(:),  end_value(:)
+    real(kind=8), allocatable       :: cmp_azimuth(:),  cmp_incident_ang(:)
+    real(kind=8), allocatable       :: sample_rate(:),  scale_factor(:)
 
-    real, allocatable       :: ev_to_sta_AZ(:), sta_to_ev_AZ(:)
-    real, allocatable       :: great_circle_arc(:) 
-    real, allocatable       :: dist(:)
-    real, allocatable       :: P_pick(:), S_pick(:)
-
-    !string, name, etc
-    !integer    :: receiver_name_len, network_len
-    !integer    :: component_len,receiver_id_len
-    !character(len=:),allocatable :: receiver_name
-    !character(len=:),allocatable :: network
-    !character(len=:),allocatable :: component
-    !character(len=:),allocatable :: receiver_id
+    real(kind=8), allocatable       :: ev_to_sta_AZ(:), sta_to_ev_AZ(:)
+    real(kind=8), allocatable       :: great_circle_arc(:) 
+    real(kind=8), allocatable       :: dist(:)
+    real(kind=8), allocatable       :: P_pick(:), S_pick(:)
 
     character(len=20),allocatable :: receiver_name_array(:), network_array(:)
     character(len=20),allocatable :: component_array(:), receiver_id_array(:)
 
     !seismograms
     type (asdf_record), allocatable :: records(:)
+    
+    !instrument response
+    logical :: STORE_RESPONSE
+    type (asdf_response), allocatable :: responses(:)
 
   end type asdf_event
 

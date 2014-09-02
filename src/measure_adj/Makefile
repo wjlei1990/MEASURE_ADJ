@@ -6,8 +6,6 @@ SRCDIR = $(PWD)
 #IDIR   = $(PWD)/UTILS/include
 #EVALLIB=/home/lei/ASDF/evalresp/.libs
 
-CFLAGS = -check
-
 # new version with default sac libraries
 SACLIBDIR = ${SACHOME}/lib
 LIBS = -lsacio -lsac
@@ -27,11 +25,13 @@ FC = ifort
 CC = icc
 MPIFC = mpif90
 MPICC = mpicc
-CFLAGS= -g -O0 -check all
+CFLAGS= -g -O0 -check noarg_temp_created
 
 _OBJ = ma_constants.o ma_variables.o ascii_rw.o \
 			 ma_sub2.o ma_sub.o measure_adj.o \
-			 mpi_weighting_subs.o rotate_subs.o
+			 mpi_weighting_subs.o rotate_adj.o \
+			 measure_adj_interface_subs.o \
+			 measure_adj_interface.o
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 

@@ -44,6 +44,7 @@ module adios_helpers_definitions_mod
   public :: define_adios_global_integer_1d_array
   public :: define_adios_global_long_1d_array
   public :: define_adios_global_logical_1d_array
+  public :: define_adios_global_byte_1d_array
   public :: define_adios_global_string_1d_array
   public :: define_adios_local_string_1d_array
   public :: define_adios_global_array1D
@@ -54,6 +55,7 @@ module adios_helpers_definitions_mod
     module procedure define_adios_float_scalar
     module procedure define_adios_integer_scalar
     module procedure define_adios_byte_scalar
+    module procedure define_adios_logical_scalar
   end interface define_adios_scalar
 
   interface define_adios_global_real_1d_array
@@ -76,13 +78,17 @@ module adios_helpers_definitions_mod
     module procedure define_adios_global_1d_logical_1d
   end interface define_adios_global_logical_1d_array
 
+  interface define_adios_global_byte_1d_array
+    module procedure define_adios_global_1d_byte_1d
+  end interface define_adios_global_byte_1d_array
+
   interface define_adios_global_string_1d_array
     module procedure define_adios_global_1d_string_1d
   end interface define_adios_global_string_1d_array
 
-	interface define_adios_local_string_1d_array
-		module procedure define_adios_local_1d_string_1d
-	end interface define_adios_local_string_1d_array
+  interface define_adios_local_string_1d_array
+    module procedure define_adios_local_1d_string_1d
+  end interface define_adios_local_string_1d_array
 
   ! Cannot include an interface in another interface
   interface define_adios_global_array1D
@@ -95,6 +101,8 @@ module adios_helpers_definitions_mod
     module procedure define_adios_global_1d_real_1d
 
     module procedure define_adios_global_1d_double_1d
+
+    module procedure define_adios_global_1d_byte_1d
 
     module procedure define_adios_global_1d_string_1d
   end interface define_adios_global_array1D
@@ -166,9 +174,6 @@ subroutine define_adios_float_scalar(adios_group, group_size_inc,  &
   integer(kind=8)                  :: varid ! dummy variable, adios use var name
 
   ! adios: 6 == real(kind=8) 
-	!print *, len_trim(name)
-	!print *, trim(path)
-	!print *, len_trim(path)
   call adios_define_var (adios_group, trim(name), trim(path), 5,  "", "", "", varid)
   group_size_inc = group_size_inc + 4
 end subroutine define_adios_float_scalar
@@ -241,6 +246,26 @@ subroutine define_adios_byte_scalar (adios_group, group_size_inc, &
 end subroutine define_adios_byte_scalar
 
 
+subroutine define_adios_logical_scalar (adios_group, group_size_inc, &
+    name, path, var)
+  use adios_write_mod
+  implicit none
+  ! Arguments
+  integer(kind=8),  intent(in)     :: adios_group
+  character(len=*), intent(in)     :: name, path
+  integer(kind=8),  intent(inout)  :: group_size_inc
+  logical,  intent(in)             :: var
+  ! Local Variables
+  integer(kind=8)                  :: varid ! dummy variable, adios use var name
+
+  print *, "define logical here"
+  print *, "name and path:", trim(name), " ;", trim(path)
+  ! adios: 0 == byte == any_data_type(kind=1) 
+  call adios_define_var (adios_group, trim(name), trim(path), adios_integer, &
+        "", "", "", varid)
+  group_size_inc = group_size_inc + 4
+end subroutine define_adios_logical_scalar
+
 !===============================================================================
 !> Define the dimensions that will be written along a global array in ADIOS.
 !! \param adios_group The adios group where the variables belongs
@@ -257,9 +282,6 @@ subroutine define_adios_global_dims_1d(adios_group, group_size_inc, &
   character(len=*), intent(in) :: array_name
   integer, intent(in) :: local_dim
   integer(kind=8), intent(inout) :: group_size_inc
-
-	!print *,"in define dims"
-	!print *,"array_name:", trim(array_name)
 
   call define_adios_integer_scalar (adios_group, &
       group_size_inc, trim(array_name), "local_dim", local_dim)
@@ -329,7 +351,6 @@ subroutine define_adios_global_1d_real_1d(adios_group, group_size_inc, &
   character(len=256) :: full_name
 
   full_name = trim(path) // trim(array_name)
-	!print *, "in define:", trim(full_name)
  
   call define_adios_global_1d_real_generic(adios_group, group_size_inc, &
       full_name, local_dim)
@@ -1255,6 +1276,52 @@ subroutine define_adios_global_1d_logical_5d(adios_group, group_size_inc, &
       full_name, local_dim)
 end subroutine define_adios_global_1d_logical_5d
 
+!----------------------------------------------------------------------------------------
+!global 1d byte array added
+subroutine define_adios_global_1d_byte_generic(adios_group, group_size_inc, &
+                array_name, local_dim)
+  use adios_write_mod
+  implicit none
+  ! Parameters
+  integer(kind=8), intent(in) :: adios_group
+  character(len=*), intent(in) :: array_name
+  integer, intent(in) :: local_dim
+  integer(kind=8), intent(inout) :: group_size_inc
+  ! Local vars
+  integer(kind=8)  :: var_id ! dummy variable, adios use var name
+
+  ! Define the dimensions of the array. local_dim used as a dummy
+  ! variable to call the integer routine.
+  call define_adios_global_dims_1d(adios_group, group_size_inc, array_name, &
+      local_dim)
+
+  call adios_define_var(adios_group, "array", array_name, 0, &
+      trim(array_name) // "/local_dim", trim(array_name) // "/global_dim", &
+      trim(array_name) // "/offset", var_id)
+  group_size_inc = group_size_inc + local_dim
+
+end subroutine define_adios_global_1d_byte_generic
+
+subroutine define_adios_global_1d_byte_1d(adios_group, group_size_inc, &
+    local_dim, path, array_name, var)
+  use adios_write_mod
+  implicit none
+  ! Parameters
+  integer(kind=8), intent(in) :: adios_group
+  character(len=*), intent(in) :: path, array_name
+  integer, intent(in) :: local_dim
+  integer(kind=8), intent(inout) :: group_size_inc
+  byte, intent(in) :: var
+  ! Local vars
+  character(len=256) :: full_name
+
+  full_name = trim(path) // trim(array_name)
+ 
+  call define_adios_global_1d_byte_generic(adios_group, group_size_inc, &
+      full_name, local_dim)
+end subroutine define_adios_global_1d_byte_1d
+
+!----------------------------------------------------------------------------------
 !string added
 subroutine define_adios_global_1d_string_generic(adios_group, group_size_inc, &
     array_name, local_dim)
@@ -1276,7 +1343,7 @@ subroutine define_adios_global_1d_string_generic(adios_group, group_size_inc, &
   call adios_define_var(adios_group, "array", array_name, 9, &
       trim(array_name) // "/local_dim", trim(array_name) // "/global_dim", &
       trim(array_name) // "/offset", var_id)
-  group_size_inc = group_size_inc + local_dim*1
+  group_size_inc = group_size_inc + local_dim
 end subroutine define_adios_global_1d_string_generic
 
 subroutine define_adios_global_1d_string_1d(adios_group, group_size_inc, &
@@ -1293,33 +1360,30 @@ subroutine define_adios_global_1d_string_1d(adios_group, group_size_inc, &
   character(len=256) :: full_name
 
   full_name = trim(path) // trim(array_name)
-	print *,"full name", trim(full_name),"local_dim:",local_dim
+  print *,"full name", trim(full_name),"local_dim:",local_dim
  
   call define_adios_global_1d_string_generic(adios_group, group_size_inc, &
       full_name, local_dim)
 end subroutine define_adios_global_1d_string_1d
 
 subroutine  define_adios_local_1d_string_1d(adios_group, group_size_inc, &
-		local_dim, path, array_name, var)
-		
-	implicit none
-	! Parameters
+                 local_dim, path, array_name, var)
+
+  implicit none
+  ! Parameters
   integer(kind=8), intent(in) :: adios_group
   character(len=*), intent(in) :: path, array_name
   integer, intent(in) :: local_dim
   integer(kind=8), intent(inout) :: group_size_inc
   character(len=*), intent(in) :: var
-	! Local 
-	character(len=256) :: full_name
-	integer(kind=8) :: var_id
+  ! Local 
+  character(len=256) :: full_name
+  integer(kind=8) :: var_id
 
-	full_name = trim(path)//trim(array_name)
+  full_name = trim(path)//trim(array_name)
 
-	!print *,"in define local:"
-	!print *,"full_name:", trim(full_name)
-
-	call adios_define_var(adios_group, array_name, path, 9, "", "", "", var_id )
-	group_size_inc = group_size_inc + 1*local_dim
+  call adios_define_var(adios_group, array_name, path, 9, "", "", "", var_id )
+  group_size_inc = group_size_inc + local_dim
 
 end subroutine define_adios_local_1d_string_1d
 

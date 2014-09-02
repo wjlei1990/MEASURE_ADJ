@@ -51,6 +51,7 @@ module adios_helpers_mod
   public :: define_adios_global_integer_1d_array
   public :: define_adios_global_long_1d_array
   public :: define_adios_global_logical_1d_array
+  public :: define_adios_global_byte_1d_array
   public :: define_adios_global_string_1d_array
   public :: define_adios_local_string_1d_array
   public :: define_adios_global_array1D
@@ -61,6 +62,7 @@ module adios_helpers_mod
   public :: write_adios_global_integer_1d_array
   public :: write_adios_global_long_1d_array
   public :: write_adios_global_logical_1d_array
+  public :: write_adios_global_byte_1d_array
   public :: write_adios_global_string_1d_array
   public :: write_adios_global_1d_array
 contains

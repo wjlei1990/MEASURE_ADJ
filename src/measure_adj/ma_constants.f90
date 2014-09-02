@@ -11,7 +11,7 @@ module ma_constants
   double precision, parameter :: LARGE_VAL = 1.0d8
 
   ! FFT parameters
-  integer, parameter :: LNPT = 15, NPT = 2**LNPT, NDIM = 250000
+  integer, parameter :: LNPT = 15, NPT = 2**LNPT, NDIM = 80000
   double precision, parameter :: FORWARD_FFT = 1.0  
   double precision, parameter :: REVERSE_FFT = -1.0   
 
