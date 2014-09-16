@@ -11,15 +11,21 @@ CFLAGS = -check all,noarg_temp_created
 # new version with default sac libraries
 TAULIBDIR=$(PWD)/ttimes_mod
 SACLIBDIR = ${SACHOME}/lib
-LIBS = -lsacio -lsac -lm -ltau
+LIBS = -lsacio -lsac -lm -ltau -lasdf
  #LIB = -L/opt/seismo/lib -lDRWFiles -lf90recipes -lDSacio -lDSacLib -lSacTools -lm
 
 #all_obj = $(shell find . -name obj/*.*)
 
+ADIOS_FLIB=$(shell adios_config -lf)
+ADIOS_INC=$(shell adios_config -cf)
+
+ASDFLIBDIR=$(ASDFHOME)/lib
+ASDFINCDIR=$(ASDFHOME)/include
+
 ## set ADIOS_DIR here or before doing make
-override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
-override ADIOS_INC:=`${ADIOS_DIR}/bin/adios_config -c -f`
-override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
+#override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
+#override ADIOS_INC:=`${ADIOS_DIR}/bin/adios_config -c -f`
+#override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
 
 ############################
 #compiler option
@@ -35,20 +41,15 @@ _OBJ = main_subs.o main.o
 
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 
-## set ADIOS_DIR here or before doing make
-override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
-override ADIOS_INC:=` ${ADIOS_DIR}/bin/adios_config -c -f`
-override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
-
 ##########################################################
 PROG = Measure_adj 
 default: MK_OBJDIR ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	  $(MPICC) -c -o $@ $< 
@@ -58,9 +59,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 MK_OBJDIR:
 	mkdir -p $(OBJDIR)
 
-make_asdf:
-	cd src/asdf_util; make
-
 make_shared:
 	cd src/shared; make
 
@@ -69,9 +67,9 @@ make_ma:
 
 all_obj = $(wildcard $(OBJDIR)/*.o)
 
-${PROG}: make_asdf make_shared make_ma $(OBJ)
-	${MPIFC} ${CFLAGS} -o $@ $(all_obj) -I$(OBJDIR) \
-		-L${TAULIBDIR} -L${SACLIBDIR} ${LIBS} ${ADIOS_FLIB}
+${PROG}: make_shared make_ma $(OBJ)
+	${MPIFC} ${CFLAGS} -o $@ $(all_obj) \
+		-L${TAULIBDIR} -L${SACLIBDIR} -L$(ASDFLIBDIR) ${LIBS} ${ADIOS_FLIB}
 
 
 .PHONY:clean print_var cleanall
