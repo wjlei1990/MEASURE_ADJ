@@ -6,7 +6,7 @@ SRCDIR = ./src/main
 #IDIR   = $(PWD)/UTILS/include
 #EVALLIB=/home/lei/ASDF/evalresp/.libs
 
-CFLAGS = -check all,noarg_temp_created
+#CFLAGS = -check all,noarg_temp_created
 
 # new version with default sac libraries
 TAULIBDIR=$(PWD)/ttimes_mod
@@ -31,11 +31,11 @@ ASDFINCDIR=$(ASDFHOME)/include
 #compiler option
 #OPT = -I${SHARED}
 #OPT = -std03
-FC = ifort
-CC = icc
-MPIFC = mpif90
-MPICC = mpicc
-CFLAGS= -g -O0 -check noarg_temp_created
+FC = ftn
+CC = cc
+MPIFC = ftn
+MPICC = cc
+#CFLAGS= -g -O0 -check noarg_temp_created
 
 _OBJ = main_subs.o main.o 
 
@@ -46,10 +46,10 @@ PROG = Measure_adj
 default: MK_OBJDIR ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) -I$(ASDFINCDIR)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) -I$(ASDFINCDIR)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	  $(MPICC) -c -o $@ $< 

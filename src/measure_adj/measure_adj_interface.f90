@@ -153,7 +153,8 @@ subroutine measure_adj_interface(obsd_all, synt_all, synt_phydisp_all, &
   !do i=1, 1
     call measure_adj(obsd_all%records(i)%record,obsd_all%npoints(i),obsd_all%begin_value(i),obsd_all%sample_rate(i),&
       synt_all%records(i)%record,synt_all%npoints(i),synt_all%begin_value(i),synt_all%sample_rate(i),&
-      synt_phydisp_all%records(i)%record,synt_phydisp_all%npoints(i),synt_phydisp_all%begin_value(i),synt_phydisp_all%sample_rate(i),&
+      synt_phydisp_all%records(i)%record,synt_phydisp_all%npoints(i),synt_phydisp_all%begin_value(i),&
+      synt_phydisp_all%sample_rate(i),&
       obsd_all%great_circle_arc(i),obsd_all%receiver_name_array(i),obsd_all%network_array(i),obsd_all%component_array(i),&
       win_all(i),measure_adj_par_all, ma_weighting_par, weighting_option,&
       win_chi_all(i), adj_source, ma_outdir)

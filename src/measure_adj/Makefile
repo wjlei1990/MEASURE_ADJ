@@ -26,11 +26,11 @@ ASDFINCDIR=$(ASDFHOME)/include
 #compiler option
 #OPT = -I${SHARED}
 #OPT = -std03
-FC = ifort
-CC = icc
-MPIFC = mpif90
-MPICC = mpicc
-CFLAGS= -g -O0 -check noarg_temp_created
+FC = ftn
+CC = cc
+MPIFC = ftn
+MPICC = cc
+#CFLAGS= -g -O0 -check noarg_temp_created
 
 _OBJ = ma_constants.o ma_variables.o ascii_rw.o \
 			 ma_sub2.o ma_sub.o measure_adj.o \
@@ -45,13 +45,13 @@ PROG = TEST
 default: ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) -I$(ASDFINCDIR)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) -I$(ASDFINCDIR)
 .F.o:
 	$(OBJDIR)/%.o: $(SRCDIR)/%.F
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) -I$(ASDFINCDIR)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) -I$(ASDFINCDIR)
 
 #$(OBJDIR)/%.o: $(SRCDIR)/%.c
 #	  $(MPICC) -c -o $@ $< 

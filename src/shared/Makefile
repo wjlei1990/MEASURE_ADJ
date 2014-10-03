@@ -6,28 +6,20 @@ SRCDIR = $(PWD)
 #IDIR   = $(PWD)/UTILS/include
 #EVALLIB=/home/lei/ASDF/evalresp/.libs
 
-CFLAGS = -check
-
 # new version with default sac libraries
 SACLIBDIR = ${SACHOME}/lib
 LIBS = -lsacio -lsac -lm
- #LIB = -L/opt/seismo/lib -lDRWFiles -lf90recipes -lDSacio -lDSacLib -lSacTools -lm
-
-
-## set ADIOS_DIR here or before doing make
-override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
-override ADIOS_INC:=`${ADIOS_DIR}/bin/adios_config -c -f`
-override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
+#LIB = -L/opt/seismo/lib -lDRWFiles -lf90recipes -lDSacio -lDSacLib -lSacTools -lm
 
 ############################
 #compiler option
 #OPT = -I${SHARED}
 #OPT = -std03
-FC = ifort
-CC = icc
-MPIFC = mpif90
-MPICC = mpicc
-CFLAGS= -g -O0 -check all
+FC = ftn
+CC = cc
+MPIFC = ftn
+MPICC = cc
+#CFLAGS= -g -O0 -check all
 
 _OBJ = flexwin_struct.o ma_struct.o \
 			 win_io_subs.o distaz.o \
@@ -36,22 +28,24 @@ _OBJ = flexwin_struct.o ma_struct.o \
 OBJ = $(patsubst %, ${OBJDIR}/%, $(_OBJ))
 
 ## set ADIOS_DIR here or before doing make
-override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
-override ADIOS_INC:=` ${ADIOS_DIR}/bin/adios_config -c -f`
-override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
+#override ADIOS_DIR:=/home/lei/bin/adios-1.5.0
+#override ADIOS_INC:=` ${ADIOS_DIR}/bin/adios_config -c -f`
+#override ADIOS_FLIB:=`${ADIOS_DIR}/bin/adios_config -l -f`
+ADIOS_INC=$(shell adios_config -cf)
+ADIOS_FLIB=$(shell adios_config -lf)
 
 ##########################################################
 PROG = TEST
 default: ${PROG}
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) $(ADIOS_INC)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.f
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) $(ADIOS_INC)
 .F.o:
 	$(OBJDIR)/%.o: $(SRCDIR)/%.F
-	  $(MPIFC) ${CFLAGS} -c -o $@ $< -module $(OBJDIR) $(ADIOS_INC)
+	  $(MPIFC) ${CFLAGS} -c -o $@ $< -J $(OBJDIR) $(ADIOS_INC)
 
 #$(OBJDIR)/%.o: $(SRCDIR)/%.c
 #	  $(MPICC) -c -o $@ $< 
